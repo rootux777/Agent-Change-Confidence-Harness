@@ -36,6 +36,22 @@ OLT.CarePortal (1)/
         └── schema/
 ```
 
+### Use existing local copies in one workspace
+
+If both the application project and the Agent Change Confidence Harness have already been downloaded locally, you can use them together without cloning the harness into `tools/`.
+
+Then, in your IDE:
+
+1. Open the local application project.
+2. Select **File → Add Folder to Workspace**.
+3. Add `/Users/YOURPATH/Agent-Change-Confidence-Harness`.
+
+Copilot should then see both workspace folders. Reference the harness with:
+
+```
+Agent-Change-Confidence-Harness/prompts/01-discovery.md
+```
+
 ### 2. Start a Copilot Agent session
 
 Open Copilot Chat in Agent mode and paste this:
