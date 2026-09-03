@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -u -o pipefail
+
+usage() {
+    printf 'Usage: %s REFERENCE_DIR WORKSPACE_DIR RESULT_FILE --authorized RELATIVE_FILE [--authorized RELATIVE_FILE...] [--exclude NAME...]\n' "$(basename "$0")" >&2
+}
+
+if (( $# < 3 )); then
+    usage
+    exit 64
+fi
+
+reference_dir=$1
+workspace_dir=$2
+result_file=$3
+shift 3
+[[ -d "$reference_dir" && -d "$workspace_dir" ]] || { printf 'Both directories are required.\n' >&2; exit 66; }
+exclude_args=()
+authorized_files=()
+while (( $# > 0 )); do
+    case $1 in
+        --authorized)
+            (( $# >= 2 )) || { printf '%s requires a file.\n' "$1" >&2; exit 64; }
+            authorized_files+=("$2")
+            shift 2
+            ;;
+        --exclude)
+            (( $# >= 2 )) || { printf '%s requires a name.\n' "$1" >&2; exit 64; }
+            exclude_args+=(--exclude="$2")
+            shift 2
+            ;;
+        *)
+            printf 'Unexpected argument: %s\n' "$1" >&2
+            exit 64
+            ;;
+    esac
+done
+(( ${#authorized_files[@]} > 0 )) || { printf 'At least one --authorized file is required.\n' >&2; exit 64; }
+started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+set +e
+if (( ${#exclude_args[@]} > 0 )); then
+    diff_output=$(diff -rq "${exclude_args[@]}" "$reference_dir" "$workspace_dir" 2>&1)
+else
+    diff_output=$(diff -rq "$reference_dir" "$workspace_dir" 2>&1)
+fi
+diff_exit_code=$?
+set -e
+completed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+if (( diff_exit_code == 0 )); then status=IDENTICAL; elif (( diff_exit_code == 1 )); then status=DIFFERENT; else status=COMMAND_FAILED; fi
+mkdir -p "$(dirname "$result_file")"
+if (( ${#exclude_args[@]} > 0 )); then
+    command_text="diff -rq ${exclude_args[*]} $reference_dir $workspace_dir"
+else
+    command_text="diff -rq $reference_dir $workspace_dir"
+fi
+authorized_json=$(printf '%s\n' "${authorized_files[@]}" | jq -Rsc 'split("\n")[:-1]')
+jq -n --arg command "$command_text" --arg startedAt "$started_at" --arg completedAt "$completed_at" --arg rawResult "$diff_output" --arg status "$status" --argjson diffExitCode "$diff_exit_code" --argjson authorizedFiles "$authorized_json" '{command: $command, startedAt: $startedAt, completedAt: $completedAt, diffExitCode: $diffExitCode, status: $status, authorizedFiles: $authorizedFiles, rawResult: $rawResult}' > "$result_file"
+if (( diff_exit_code > 1 )); then exit "$diff_exit_code"; fi
+exit 0

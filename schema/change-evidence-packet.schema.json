@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/agent-change-confidence-harness/change-evidence-packet.schema.json",
+  "title": "Agent Change Confidence Evidence Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "changeId", "packetMode", "humanApproval", "status", "sourceIdentity", "requestedIntent", "nonGoals", "changedFiles", "affectedBoundaries", "behaviorPreserved", "executedValidation", "unavailableValidation", "privacyExclusions", "uncertainties", "rollbackInstructions", "humanDecisionStatus", "nextPermittedAction", "evidenceArtifacts"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "changeId": {"type": "string", "minLength": 1},
+    "packetMode": {"enum": ["DISCOVERY", "IMPLEMENTATION", "EVIDENCE_REPAIR", "CLOSEOUT"]},
+    "humanApproval": {"enum": ["GRANTED", "NOT_GRANTED"]},
+    "status": {"type": "string", "minLength": 1},
+    "sourceIdentity": {"$ref": "#/$defs/sourceIdentity"},
+    "agentIdentity": {"type": "string"},
+    "requestedIntent": {"type": "string", "minLength": 1},
+    "nonGoals": {"type": "array", "items": {"type": "string"}},
+    "changedFiles": {"type": "array", "items": {"$ref": "#/$defs/changedFile"}},
+    "affectedBoundaries": {"type": "array", "items": {"type": "string"}},
+    "designRationale": {"type": "string"},
+    "behaviorPreserved": {"type": "array", "items": {"type": "string"}},
+    "executedValidation": {"type": "array", "items": {"$ref": "#/$defs/validation"}},
+    "unavailableValidation": {"type": "array", "items": {"type": "string"}},
+    "expectedTelemetry": {"type": "object"},
+    "privacyExclusions": {"type": "array", "items": {"type": "string"}},
+    "uncertainties": {"type": "array", "items": {"type": "string"}},
+    "rollbackInstructions": {"type": "string", "minLength": 1},
+    "pilotMeasurements": {"type": "string"},
+    "humanDecisionStatus": {"type": "string", "minLength": 1},
+    "nextPermittedAction": {"const": "HUMAN_REVIEW_ONLY"},
+    "evidenceArtifacts": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "sourceIdentity": {"type": "object", "additionalProperties": false, "required": ["workspace", "referenceSnapshot", "referenceHashes", "beforeHashesArtifact", "afterHashesArtifact"], "properties": {"workspace": {"type": "string"}, "referenceSnapshot": {"type": "string"}, "referenceHashes": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}}, "beforeHashesArtifact": {"type": "string"}, "afterHashesArtifact": {"type": "string"}}},
+    "changedFile": {"type": "object", "additionalProperties": false, "required": ["path", "members"], "properties": {"path": {"type": "string", "pattern": "^(?!/)(?!.*\\.\\.)"}, "members": {"type": "array", "items": {"type": "string"}}}},
+    "validation": {"type": "object", "additionalProperties": false, "required": ["command", "workingDirectory", "startedAt", "completedAt", "exitCode", "status", "artifactReferences", "limitations"], "properties": {"command": {"type": "string", "minLength": 1}, "workingDirectory": {"type": "string", "minLength": 1}, "startedAt": {"type": "string", "format": "date-time"}, "completedAt": {"type": "string", "format": "date-time"}, "exitCode": {"type": "integer"}, "status": {"type": "string", "minLength": 1}, "artifactReferences": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}}}
+  }
+}

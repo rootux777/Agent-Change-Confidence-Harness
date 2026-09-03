@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -u -o pipefail
+
+usage() {
+    printf 'Usage: %s RESULT_JSON LOG_FILE -- COMMAND [ARGUMENT...]\n' "$(basename "$0")" >&2
+}
+
+if (( $# < 4 )) || [[ $3 != -- ]]; then
+    usage
+    exit 64
+fi
+
+result_file=$1
+log_file=$2
+shift 3
+started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+set +e
+"$@" >"$log_file" 2>&1
+command_exit_code=$?
+set -e
+completed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+if (( command_exit_code == 0 )); then status=PASS; else status=COMMAND_FAILED; fi
+mkdir -p "$(dirname "$result_file")"
+jq -n --arg command "$*" --arg workingDirectory "$PWD" --arg startedAt "$started_at" --arg completedAt "$completed_at" --arg logFile "$log_file" --arg status "$status" --argjson exitCode "$command_exit_code" '{command: $command, workingDirectory: $workingDirectory, startedAt: $startedAt, completedAt: $completedAt, exitCode: $exitCode, status: $status, artifactReferences: [$logFile], limitations: []}' > "$result_file"
+exit "$command_exit_code"

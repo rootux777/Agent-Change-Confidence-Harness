@@ -1,0 +1,3 @@
+# Local evidence and fixture output
+*.log
+*.result.json

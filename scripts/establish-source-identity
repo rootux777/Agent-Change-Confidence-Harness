@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    printf 'Usage: %s OUTPUT_FILE AUTHORIZED_FILE...\n' "$(basename "$0")" >&2
+}
+
+if (( $# < 2 )); then
+    usage
+    exit 64
+fi
+
+output_file=$1
+shift
+mkdir -p "$(dirname "$output_file")"
+command_text="shasum -a 256"
+for file in "$@"; do
+    [[ -f "$file" ]] || { printf 'Missing authorized file: %s\n' "$file" >&2; exit 66; }
+    command_text+=" $(printf '%q' "$file")"
+done
+started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+raw_hashes=$(shasum -a 256 "$@")
+completed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+jq -n --arg command "$command_text" --arg startedAt "$started_at" --arg completedAt "$completed_at" --arg rawHashes "$raw_hashes" '{command: $command, startedAt: $startedAt, completedAt: $completedAt, exitCode: 0, rawHashes: $rawHashes}' > "$output_file"
+printf '%s\n' "$raw_hashes"

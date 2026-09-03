@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    printf 'Usage: %s PACKET_JSON SCHEMA_JSON\n' "$(basename "$0")" >&2
+}
+
+if (( $# != 2 )); then
+    usage
+    exit 64
+fi
+
+packet_file=$1
+schema_file=$2
+[[ -f "$packet_file" && -f "$schema_file" ]] || { printf 'Packet and schema files are required.\n' >&2; exit 66; }
+command -v jq >/dev/null 2>&1 || { printf 'jq is required.\n' >&2; exit 69; }
+command -v jsonschema >/dev/null 2>&1 || { printf 'jsonschema is required for schema validation.\n' >&2; exit 69; }
+jq empty "$packet_file"
+jq empty "$schema_file"
+jsonschema -i "$packet_file" "$schema_file"
+jq -e '.nextPermittedAction == "HUMAN_REVIEW_ONLY"' "$packet_file" >/dev/null
+printf 'EVIDENCE_VALIDATION=PASS\n'
