@@ -9,6 +9,8 @@
 - Authorized files:
 - Required behavior:
 - Behavior that must remain unchanged:
+- Comment expectations (only for non-obvious intent):
+- Approved application logging or telemetry events:
 - Approved structured fields:
 - Prohibited data in logs/evidence:
 - Validation command(s):

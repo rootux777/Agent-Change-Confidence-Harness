@@ -9,6 +9,8 @@ Given the change request:
 - State one falsifiable local hypothesis about the behavior.
 - State one cheap check that could disconfirm it.
 - List the exact candidate files and explicitly separate authorized from reference files.
+- Identify existing code-comment and logging conventions at the owning boundary.
+- Recommend the smallest useful comment or structured event only when the request calls for one.
 - Identify privacy-sensitive values that must not enter logs or evidence.
 - Report source-control and environment facts without changing files.
 

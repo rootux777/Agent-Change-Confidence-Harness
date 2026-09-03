@@ -7,6 +7,8 @@
 - Protected reference:
 - Authorized writable files:
 - Authorized validation:
+- Authorized code comments (purpose and files):
+- Authorized application logging or telemetry (event, level, fields, and files):
 - Authorized package restore: YES / NO
 - Prohibited operations:
 - Source identity requirement:

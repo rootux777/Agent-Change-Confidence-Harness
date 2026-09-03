@@ -5,7 +5,7 @@ Use this workflow for a requested code change. The harness makes change scope an
 1. Before editing, obtain a completed change request with the intended behavior, exact authorized files, non-goals, privacy exclusions, validation command, and rollback plan. Follow `prompts/01-discovery.md` for read-only discovery.
 2. Do not edit until a human has completed `templates/implementation-authorization.md`. Treat only the listed workspace, files, permitted commands, and next action as authorized.
 3. Before and after an authorized change, use `scripts/establish-source-identity` to hash each authorized file. Use `scripts/compare-workspaces` against a protected reference when one is available.
-4. Implement only the approved scope. Follow `prompts/02-implementation.md`; preserve stated behavior outside that scope.
+4. Implement only the approved scope. Follow `prompts/02-implementation.md`; preserve stated behavior outside that scope. Add code comments only for non-obvious intent or constraints, and add application logging or telemetry only when its event, level, fields, and destination are authorized.
 5. Capture focused validation with `scripts/run-and-capture`, then record the outcome in `templates/change-evidence-packet.json` and validate it with `scripts/validate-evidence`.
 6. Never include passwords, access tokens, API keys, personal identifiers, request payloads, raw exception contents, or other sensitive values in command arguments, logs, or evidence artifacts.
 7. Once the packet is complete, stop at `HUMAN_REVIEW_ONLY`. A reviewer or PM must make the next decision using the supplied summary and decision templates.

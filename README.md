@@ -18,7 +18,7 @@ Intended users are developers, reviewers, and a PM or technical lead working tog
 
 ## What It Does
 
-The harness provides prompts, request and authorization templates, a versioned evidence-packet shape, local shell helpers, and a fictional example. It records source hashes, commands, timestamps, exit codes, expected nonzero search or diff outcomes, validation scope, privacy boundaries, and human review status.
+The harness provides prompts, request and authorization templates, a versioned evidence-packet shape, local shell helpers, and a fictional example. It records source hashes, commands, timestamps, exit codes, expected nonzero search or diff outcomes, validation scope, privacy boundaries, approved code-comment and application-logging scope, and human review status.
 
 ## What It Does Not Prove
 

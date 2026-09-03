@@ -9,6 +9,8 @@ Check:
 - Validation commands are literal and results preserve exit codes.
 - Expected nonzero search/diff outcomes are explained.
 - Privacy exclusions match the actual message template and structured fields.
+- Added comments explain non-obvious intent and match the approved scope.
+- Added application logging or telemetry matches the approved event, level, fields, and privacy exclusions.
 - Unavailable validation and provider-rendering uncertainty are explicit.
 - Superseded evidence is preserved after corrections.
 - The packet stops at the declared human decision boundary.

@@ -20,7 +20,7 @@ In Copilot Chat, confirm that `.github/copilot-instructions.md` appears in the r
 
 ## Per-Change Workflow
 
-1. Complete `tools/Agent-Change-Confidence-Harness/templates/change-request.md`. Include the exact files that may be changed, explicit non-goals, approved validation, privacy exclusions, and rollback instructions.
+1. Complete `tools/Agent-Change-Confidence-Harness/templates/change-request.md`. Include the exact files that may be changed, explicit non-goals, approved validation, privacy exclusions, rollback instructions, and any requested comments or application logging/telemetry.
 2. Open Copilot Chat in **Ask** mode. Attach or reference the completed request and `tools/Agent-Change-Confidence-Harness/prompts/01-discovery.md`. Ask Copilot to produce the discovery record only. Do not allow edits in this phase.
 3. Have a human review the discovery record and complete `templates/implementation-authorization.md`. The authorization must name the writable workspace, allowed files, commands, prohibited operations, and next permitted action.
 4. Open a new Copilot Chat session in the mode your team permits for edits. Attach or reference the authorization and `prompts/02-implementation.md`. Copilot may edit only after this approval is complete.
@@ -49,5 +49,6 @@ Work only within that authorization. Capture the required evidence and stop at H
 
 - Never provide passwords, API keys, access tokens, or personal identifiers to Copilot Chat or place them in shell command arguments.
 - Do not use `scripts/run-and-capture` with a command that exposes a secret; it stores the command arguments and output log as evidence.
+- Add code comments only to explain non-obvious intent, constraints, or trade-offs. Add application logging only when its event, level, fields, and destination are explicitly approved.
 - Keep protected reference and writable workspace directories separate when using `scripts/compare-workspaces`.
 - Treat a passing validation command as evidence of the covered behavior only, not proof of complete correctness or production readiness.
