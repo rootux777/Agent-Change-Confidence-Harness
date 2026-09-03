@@ -1,5 +1,77 @@
 # Install With GitHub Copilot
 
+## Installation And Usability Test
+
+### 1. Add the harness to the project
+
+In the IDE terminal:
+
+```yaml
+cd "/YOUR PROJECT HERE"
+
+mkdir -p tools
+
+git clone --depth 1 \
+  https://github.com/rootux777/Agent-Change-Confidence-Harness.git \
+  tools/Agent-Change-Confidence-Harness
+```
+
+If you already cloned it there, update it instead:
+
+```
+git -C tools/Agent-Change-Confidence-Harness pull --ff-only
+```
+
+You should now see:
+
+```
+OLT.CarePortal (1)/
+├── OLT.CarePortal.Core/
+└── tools/
+    └── Agent-Change-Confidence-Harness/
+        ├── README.md
+        ├── prompts/
+        ├── templates/
+        ├── scripts/
+        └── schema/
+```
+
+### 2. Start a Copilot Agent session
+
+Open Copilot Chat in Agent mode and paste this:
+
+```yaml
+We are conducting an installation and usability test of the
+Agent Change Confidence Harness.
+
+Do not modify any files.
+Do not restore packages, build, run tests, access external services,
+or execute the harness scripts.
+
+First, confirm that you can read these files:
+
+- tools/Agent-Change-Confidence-Harness/README.md
+- tools/Agent-Change-Confidence-Harness/INSTALL-GITHUB-COPILOT.md
+- tools/Agent-Change-Confidence-Harness/prompts/01-discovery.md
+- tools/Agent-Change-Confidence-Harness/templates/change-request.md
+- tools/Agent-Change-Confidence-Harness/templates/implementation-authorization.md
+
+Then:
+
+1. Summarize the harness workflow in your own words.
+2. Explain the difference between a change request, discovery,
+   implementation authorization, and human review.
+3. Identify the information still needed before a read-only discovery
+   can begin.
+4. Do not begin implementation.
+5. Do not create or edit the change-request template yet.
+6. Stop with exactly:
+
+CHECKPOINT_STATUS: READY_FOR_CHANGE_REQUEST_INPUT
+FILES_MODIFIED: NONE
+NEXT_PERMITTED_ACTION: HUMAN_INPUT_ONLY
+```
+
 ## Add To A Local Project
 
 Copy this package into a local, non-production workspace or add it as a local team tool directory. Keep the package outside application source and keep evidence output separate from application files. Do not publish or install it as a runtime dependency.
