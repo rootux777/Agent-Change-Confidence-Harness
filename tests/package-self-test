@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+package_root=$(cd "$(dirname "$0")/.." && pwd)
+fixture_root=$(mktemp -d '/tmp/Agent Change Confidence Harness.XXXXXX')
+trap 'rm -rf "$fixture_root"' EXIT
+reference="$fixture_root/reference copy"
+workspace="$fixture_root/workspace copy"
+evidence="$fixture_root/evidence output"
+mkdir -p "$reference/src" "$workspace/src" "$evidence"
+
+pass_count=0
+fail_count=0
+run_case() {
+    local name=$1
+    shift
+    if "$@"; then
+        pass_count=$((pass_count + 1))
+        printf 'PASS %s\n' "$name"
+    else
+        fail_count=$((fail_count + 1))
+        printf 'FAIL %s\n' "$name" >&2
+        return 1
+    fi
+}
+expect_success() {
+    "$@" >/dev/null 2>&1
+}
+expect_failure() {
+    set +e
+    "$@" >/dev/null 2>&1
+    local exit_code=$?
+    set -e
+    (( exit_code != 0 ))
+}
+compare() {
+    "$package_root/scripts/compare-workspaces" "$reference" "$workspace" "$evidence/compare.json" --authorized "src/allowed file.txt" --exclude ignored >/dev/null 2>&1
+}
+
+printf 'same\n' > "$reference/src/same.txt"
+printf 'same\n' > "$workspace/src/same.txt"
+run_case identical_trees expect_success compare
+jq -e '.status == "IDENTICAL" and .exitCode == 0 and .observedDifferences == [] and .unauthorizedDifferences == []' "$evidence/compare.json" >/dev/null
+
+printf 'before\n' > "$reference/src/allowed file.txt"
+printf 'after\n' > "$workspace/src/allowed file.txt"
+run_case authorized_modified expect_success compare
+jq -e '.status == "AUTHORIZED_DIFFERENCES_ONLY" and .exitCode == 0 and .observedDifferences == ["src/allowed file.txt"] and .unauthorizedDifferences == []' "$evidence/compare.json" >/dev/null
+
+printf 'new\n' > "$workspace/src/unauthorized-added.txt"
+run_case unauthorized_added expect_failure compare
+jq -e '.status == "UNAUTHORIZED_DIFFERENCES" and .exitCode != 0 and (.unauthorizedDifferences | index("src/unauthorized-added.txt")) != null' "$evidence/compare.json" >/dev/null
+rm "$workspace/src/unauthorized-added.txt"
+rm "$reference/src/same.txt"
+run_case unauthorized_deleted expect_failure compare
+jq -e '.status == "UNAUTHORIZED_DIFFERENCES" and (.unauthorizedDifferences | index("src/same.txt")) != null' "$evidence/compare.json" >/dev/null
+printf 'same\n' > "$reference/src/same.txt"
+printf 'changed\n' > "$workspace/src/same.txt"
+printf 'mixed\n' > "$workspace/src/mixed.txt"
+run_case mixed_differences expect_failure compare
+jq -e '.status == "UNAUTHORIZED_DIFFERENCES" and (.unauthorizedDifferences | index("src/mixed.txt")) != null and (.unauthorizedDifferences | index("src/same.txt")) != null' "$evidence/compare.json" >/dev/null
+printf 'same\n' > "$workspace/src/same.txt"
+rm "$workspace/src/mixed.txt"
+run_case authorized_only_pass expect_success compare
+jq -e '.status == "AUTHORIZED_DIFFERENCES_ONLY" and .exitCode == 0' "$evidence/compare.json" >/dev/null
+run_case absolute_authorization_rejected expect_failure "$package_root/scripts/compare-workspaces" "$reference" "$workspace" "$evidence/invalid.json" --authorized /tmp/file
+run_case traversal_authorization_rejected expect_failure "$package_root/scripts/compare-workspaces" "$reference" "$workspace" "$evidence/invalid.json" --authorized ../file
+
+run_case source_identity_with_spaces expect_success "$package_root/scripts/establish-source-identity" "$evidence/hash.json" "$reference/src/allowed file.txt"
+jq -e '.exitCode == 0 and (.rawHashes | length) > 0' "$evidence/hash.json" >/dev/null
+run_case capture_creates_parents expect_success "$package_root/scripts/run-and-capture" "$evidence/nested/result.json" "$evidence/nested/log file.txt" -- printf 'ok'
+jq -e '.exitCode == 0 and .status == "PASS" and .argv == ["printf", "ok"] and (.artifactReferences | length) == 1' "$evidence/nested/result.json" >/dev/null
+run_case capture_exit_7 expect_failure "$package_root/scripts/run-and-capture" "$evidence/failure/result.json" "$evidence/failure/log.txt" -- sh -c 'exit 7'
+jq -e '.exitCode == 7 and .status == "COMMAND_FAILED"' "$evidence/failure/result.json" >/dev/null
+run_case capture_argument_spaces expect_success "$package_root/scripts/run-and-capture" "$evidence/space/result.json" "$evidence/space/log.txt" -- printf '%s' 'argument with spaces'
+jq -e '.argv == ["printf", "%s", "argument with spaces"]' "$evidence/space/result.json" >/dev/null
+run_case missing_executable expect_failure "$package_root/scripts/run-and-capture" "$evidence/missing/result.json" "$evidence/missing/log.txt" -- fictional-command-that-does-not-exist
+jq -e '.exitCode != 0 and .status == "COMMAND_FAILED" and (.artifactReferences | length) == 1' "$evidence/missing/result.json" >/dev/null
+run_case result_and_log_exist test -f "$evidence/missing/result.json"
+run_case missing_log_not_referenced test ! -e "$evidence/never-created.log"
+
+printf 'hash-before\n' > "$evidence/before-hash.txt"
+printf 'hash-after\n' > "$evidence/after-hash.txt"
+printf 'validation\n' > "$evidence/validation.log"
+jq -n '{schemaVersion: "1.0.0", changeId: "SELF-001", packetMode: "IMPLEMENTATION", humanApproval: "GRANTED", status: "READY_FOR_PM_REVIEW", sourceIdentity: {workspace: "fixture", referenceSnapshot: "reference", referenceHashes: {}, beforeHashesArtifact: "before-hash.txt", afterHashesArtifact: "after-hash.txt"}, requestedIntent: "fixture change", nonGoals: [], changedFiles: [{path: "src/example.txt", members: ["Example"]}], affectedBoundaries: [], behaviorPreserved: [], executedValidation: [{command: "printf validation", workingDirectory: ".", startedAt: "2026-01-01T10:00:00Z", completedAt: "2026-01-01T10:00:01Z", exitCode: 0, status: "PASS", artifactReferences: ["validation.log"], limitations: []}], unavailableValidation: [], privacyExclusions: [], uncertainties: [], rollbackInstructions: "Restore the file.", humanDecisionStatus: "NOT_REVIEWED", nextPermittedAction: "HUMAN_REVIEW_ONLY", evidenceArtifacts: ["before-hash.txt", "after-hash.txt"]}' > "$evidence/valid-packet.json"
+run_case semantic_valid_packet expect_success "$package_root/scripts/validate-evidence" "$evidence/valid-packet.json" "$package_root/schema/change-evidence-packet.schema.json"
+jq '.evidenceArtifacts = ["missing.log"]' "$evidence/valid-packet.json" > "$evidence/missing-artifact-packet.json"
+run_case semantic_missing_artifact expect_failure "$package_root/scripts/validate-evidence" "$evidence/missing-artifact-packet.json" "$package_root/schema/change-evidence-packet.schema.json"
+jq '.executedValidation[0].exitCode = 7 | .executedValidation[0].status = "PASS"' "$evidence/valid-packet.json" > "$evidence/nonzero-pass-packet.json"
+run_case semantic_nonzero_pass_rejected expect_failure "$package_root/scripts/validate-evidence" "$evidence/nonzero-pass-packet.json" "$package_root/schema/change-evidence-packet.schema.json"
+jq '.changedFiles = [] | .executedValidation = []' "$evidence/valid-packet.json" > "$evidence/incomplete-granted-packet.json"
+run_case semantic_incomplete_granted_rejected expect_failure "$package_root/scripts/validate-evidence" "$evidence/incomplete-granted-packet.json" "$package_root/schema/change-evidence-packet.schema.json"
+
+printf 'SELF_TEST_PASS_COUNT=%s\nSELF_TEST_FAIL_COUNT=%s\n' "$pass_count" "$fail_count"
+(( fail_count == 0 ))

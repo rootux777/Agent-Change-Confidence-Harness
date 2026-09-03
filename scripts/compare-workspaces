@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u -o pipefail
+set -euo pipefail
 
 usage() {
     printf 'Usage: %s REFERENCE_DIR WORKSPACE_DIR RESULT_FILE --authorized RELATIVE_FILE [--authorized RELATIVE_FILE...] [--exclude NAME...]\n' "$(basename "$0")" >&2
@@ -36,6 +36,9 @@ while (( $# > 0 )); do
     esac
 done
 (( ${#authorized_files[@]} > 0 )) || { printf 'At least one --authorized file is required.\n' >&2; exit 64; }
+for authorized_file in "${authorized_files[@]}"; do
+    [[ "$authorized_file" != /* && "$authorized_file" != ./* && "$authorized_file" != */../* && "$authorized_file" != ../* && "$authorized_file" != */.. && "$authorized_file" != .. ]] || { printf 'Authorization path must be relative and contain no traversal: %s\n' "$authorized_file" >&2; exit 64; }
+done
 started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 set +e
 if (( ${#exclude_args[@]} > 0 )); then
@@ -46,7 +49,46 @@ fi
 diff_exit_code=$?
 set -e
 completed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-if (( diff_exit_code == 0 )); then status=IDENTICAL; elif (( diff_exit_code == 1 )); then status=DIFFERENT; else status=COMMAND_FAILED; fi
+observed_differences=()
+unauthorized_differences=()
+if (( diff_exit_code > 1 )); then
+    status=COMMAND_FAILED
+else
+    if (( diff_exit_code == 1 )); then
+        while IFS= read -r difference; do
+            [[ -n "$difference" ]] || continue
+            if [[ "$difference" == "Only in $reference_dir:"* || "$difference" == "Only in $reference_dir/"* ]]; then
+                only_path=${difference#Only in }
+                only_directory=${only_path%: *}
+                only_name=${only_path##*: }
+                observed_differences+=("${only_directory#"$reference_dir"/}/$only_name")
+            elif [[ "$difference" == "Files $reference_dir/"*" and $workspace_dir/"*" differ" ]]; then
+                difference=${difference#Files "$reference_dir"/}
+                difference=${difference% and "$workspace_dir"/* differ}
+                observed_differences+=("$difference")
+            elif [[ "$difference" == "Only in $workspace_dir:"* || "$difference" == "Only in $workspace_dir/"* ]]; then
+                only_path=${difference#Only in }
+                only_directory=${only_path%: *}
+                only_name=${only_path##*: }
+                observed_differences+=("${only_directory#"$workspace_dir"/}/$only_name")
+            fi
+        done <<< "$diff_output"
+    fi
+    for observed_difference in "${observed_differences[@]:-}"; do
+        authorized=false
+        for authorized_file in "${authorized_files[@]}"; do
+            if [[ "$observed_difference" == "$authorized_file" || "$observed_difference" == "$authorized_file/"* ]]; then
+                authorized=true
+                break
+            fi
+        done
+        $authorized || unauthorized_differences+=("$observed_difference")
+    done
+    if (( ${#observed_differences[@]} == 0 )); then status=IDENTICAL
+    elif (( ${#unauthorized_differences[@]} == 0 )); then status=AUTHORIZED_DIFFERENCES_ONLY
+    else status=UNAUTHORIZED_DIFFERENCES
+    fi
+fi
 mkdir -p "$(dirname "$result_file")"
 if (( ${#exclude_args[@]} > 0 )); then
     command_text="diff -rq ${exclude_args[*]} $reference_dir $workspace_dir"
@@ -54,6 +96,10 @@ else
     command_text="diff -rq $reference_dir $workspace_dir"
 fi
 authorized_json=$(printf '%s\n' "${authorized_files[@]}" | jq -Rsc 'split("\n")[:-1]')
-jq -n --arg command "$command_text" --arg startedAt "$started_at" --arg completedAt "$completed_at" --arg rawResult "$diff_output" --arg status "$status" --argjson diffExitCode "$diff_exit_code" --argjson authorizedFiles "$authorized_json" '{command: $command, startedAt: $startedAt, completedAt: $completedAt, diffExitCode: $diffExitCode, status: $status, authorizedFiles: $authorizedFiles, rawResult: $rawResult}' > "$result_file"
-if (( diff_exit_code > 1 )); then exit "$diff_exit_code"; fi
+observed_json=$(printf '%s\n' "${observed_differences[@]:-}" | jq -Rsc 'split("\n") | map(select(length > 0))')
+unauthorized_json=$(printf '%s\n' "${unauthorized_differences[@]:-}" | jq -Rsc 'split("\n") | map(select(length > 0))')
+exclusions_json=$(printf '%s\n' "${exclude_args[@]:-}" | jq -Rsc 'split("\n") | map(select(length > 0) | sub("^--exclude="; ""))')
+if [[ "$status" == COMMAND_FAILED || "$status" == UNAUTHORIZED_DIFFERENCES ]]; then recorded_exit_code=1; else recorded_exit_code=0; fi
+jq -n --arg command "$command_text" --arg startedAt "$started_at" --arg completedAt "$completed_at" --arg rawResult "$diff_output" --arg status "$status" --argjson diffExitCode "$diff_exit_code" --argjson exitCode "$recorded_exit_code" --argjson authorizedFiles "$authorized_json" --argjson observedDifferences "$observed_json" --argjson unauthorizedDifferences "$unauthorized_json" --argjson exclusions "$exclusions_json" '{command: $command, startedAt: $startedAt, completedAt: $completedAt, diffExitCode: $diffExitCode, exitCode: $exitCode, status: $status, authorizedFiles: $authorizedFiles, observedDifferences: $observedDifferences, unauthorizedDifferences: $unauthorizedDifferences, exclusions: $exclusions, rawResult: $rawResult}' > "$result_file"
+if [[ "$status" == UNAUTHORIZED_DIFFERENCES || "$status" == COMMAND_FAILED ]]; then exit 1; fi
 exit 0

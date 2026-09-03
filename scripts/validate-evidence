@@ -18,5 +18,27 @@ command -v jsonschema >/dev/null 2>&1 || { printf 'jsonschema is required for sc
 jq empty "$packet_file"
 jq empty "$schema_file"
 jsonschema -i "$packet_file" "$schema_file"
+evidence_root=$(cd "$(dirname "$packet_file")" && pwd)
+is_safe_relative_path() {
+    [[ "$1" != /* && "$1" != ./* && "$1" != ../* && "$1" != */../* && "$1" != */.. && "$1" != .. ]]
+}
+resolve_evidence_path() {
+    local candidate=$1
+    is_safe_relative_path "$candidate" || return 1
+    local resolved
+    resolved=$(cd "$evidence_root" && cd "$(dirname "$candidate")" && printf '%s/%s' "$PWD" "$(basename "$candidate")") || return 1
+    [[ "$resolved" == "$evidence_root"/* ]]
+}
 jq -e '.nextPermittedAction == "HUMAN_REVIEW_ONLY"' "$packet_file" >/dev/null
+while IFS= read -r artifact; do
+    [[ -n "$artifact" ]] || continue
+    resolve_evidence_path "$artifact" || { printf 'Invalid evidence path: %s\n' "$artifact" >&2; exit 1; }
+    [[ -f "$evidence_root/$artifact" ]] || { printf 'Missing evidence artifact: %s\n' "$artifact" >&2; exit 1; }
+done < <(jq -r '.sourceIdentity.beforeHashesArtifact, .sourceIdentity.afterHashesArtifact, .evidenceArtifacts[]' "$packet_file")
+while IFS= read -r artifact; do
+    resolve_evidence_path "$artifact" || { printf 'Invalid validation artifact path: %s\n' "$artifact" >&2; exit 1; }
+    [[ -f "$evidence_root/$artifact" ]] || { printf 'Missing validation artifact: %s\n' "$artifact" >&2; exit 1; }
+done < <(jq -r '.executedValidation[]?.artifactReferences[]?' "$packet_file")
+jq -e 'all(.executedValidation[]?; .status != "PASS" or .exitCode == 0)' "$packet_file" >/dev/null
+jq -e '(.packetMode != "IMPLEMENTATION") or (.humanApproval != "GRANTED") or ((.changedFiles | length) > 0 and (.executedValidation | length) > 0)' "$packet_file" >/dev/null
 printf 'EVIDENCE_VALIDATION=PASS\n'

@@ -10,7 +10,7 @@
     "changeId": {"type": "string", "minLength": 1},
     "packetMode": {"enum": ["DISCOVERY", "IMPLEMENTATION", "EVIDENCE_REPAIR", "CLOSEOUT"]},
     "humanApproval": {"enum": ["GRANTED", "NOT_GRANTED"]},
-    "status": {"type": "string", "minLength": 1},
+    "status": {"enum": ["DRAFT", "READY_FOR_PM_REVIEW", "READY_FOR_PM_RE_REVIEW", "ACCEPTED", "ACCEPTED_WITH_CHANGES", "NEEDS_MORE_EVIDENCE"]},
     "sourceIdentity": {"$ref": "#/$defs/sourceIdentity"},
     "agentIdentity": {"type": "string"},
     "requestedIntent": {"type": "string", "minLength": 1},
@@ -26,13 +26,14 @@
     "uncertainties": {"type": "array", "items": {"type": "string"}},
     "rollbackInstructions": {"type": "string", "minLength": 1},
     "pilotMeasurements": {"type": "string"},
-    "humanDecisionStatus": {"type": "string", "minLength": 1},
+    "humanDecisionStatus": {"enum": ["NOT_REVIEWED", "PENDING_PM_REVIEW", "PENDING_PM_RE_REVIEW", "ACCEPTED", "ACCEPTED_WITH_CHANGES", "NEEDS_MORE_EVIDENCE"]},
     "nextPermittedAction": {"const": "HUMAN_REVIEW_ONLY"},
-    "evidenceArtifacts": {"type": "array", "items": {"type": "string"}}
+    "evidenceArtifacts": {"type": "array", "items": {"$ref": "#/$defs/relativePath"}}
   },
   "$defs": {
-    "sourceIdentity": {"type": "object", "additionalProperties": false, "required": ["workspace", "referenceSnapshot", "referenceHashes", "beforeHashesArtifact", "afterHashesArtifact"], "properties": {"workspace": {"type": "string"}, "referenceSnapshot": {"type": "string"}, "referenceHashes": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}}, "beforeHashesArtifact": {"type": "string"}, "afterHashesArtifact": {"type": "string"}}},
-    "changedFile": {"type": "object", "additionalProperties": false, "required": ["path", "members"], "properties": {"path": {"type": "string", "pattern": "^(?!/)(?!.*\\.\\.)"}, "members": {"type": "array", "items": {"type": "string"}}}},
-    "validation": {"type": "object", "additionalProperties": false, "required": ["command", "workingDirectory", "startedAt", "completedAt", "exitCode", "status", "artifactReferences", "limitations"], "properties": {"command": {"type": "string", "minLength": 1}, "workingDirectory": {"type": "string", "minLength": 1}, "startedAt": {"type": "string", "format": "date-time"}, "completedAt": {"type": "string", "format": "date-time"}, "exitCode": {"type": "integer"}, "status": {"type": "string", "minLength": 1}, "artifactReferences": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}}}
+    "relativePath": {"type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*\\\\)"},
+    "sourceIdentity": {"type": "object", "additionalProperties": false, "required": ["workspace", "referenceSnapshot", "referenceHashes", "beforeHashesArtifact", "afterHashesArtifact"], "properties": {"workspace": {"type": "string"}, "referenceSnapshot": {"type": "string"}, "referenceHashes": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"}}, "beforeHashesArtifact": {"$ref": "#/$defs/relativePath"}, "afterHashesArtifact": {"$ref": "#/$defs/relativePath"}}},
+    "changedFile": {"type": "object", "additionalProperties": false, "required": ["path", "members"], "properties": {"path": {"$ref": "#/$defs/relativePath"}, "members": {"type": "array", "items": {"type": "string"}}}},
+    "validation": {"type": "object", "additionalProperties": false, "required": ["command", "workingDirectory", "startedAt", "completedAt", "exitCode", "status", "artifactReferences", "limitations"], "properties": {"command": {"type": "string", "minLength": 1}, "workingDirectory": {"type": "string", "minLength": 1}, "startedAt": {"type": "string", "format": "date-time"}, "completedAt": {"type": "string", "format": "date-time"}, "exitCode": {"type": "integer"}, "status": {"enum": ["PASS", "COMMAND_FAILED", "EXPECTED_NONZERO", "SKIPPED"]}, "artifactReferences": {"type": "array", "items": {"$ref": "#/$defs/relativePath"}}, "limitations": {"type": "array", "items": {"type": "string"}}}}
   }
 }

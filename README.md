@@ -36,6 +36,8 @@ It does not prove complete correctness, security, privacy, production readiness,
 8. Present the packet, summary, measurements, and uncertainties for human review.
 9. Record the human decision and stop at the declared next permitted action.
 
+The draft template is a form, not a valid completed evidence packet: artifact paths are placeholders until real files exist. Run the validator only after populating the packet and evidence directory.
+
 ## Team Preview Boundary
 
 V0.1 was validated through one local .NET pilot only. That pilot demonstrates the workflow in one repository and does not establish cross-language, CI, deployment, or organizational reliability.

@@ -18,6 +18,15 @@ cp -R /path/to/Agent-Change-Confidence-Harness ./tools/Agent-Change-Confidence-H
 
 Start with `templates/change-request.md`. State the intent, exact authorized files, non-goals, privacy exclusions, validation command, and rollback. Use fictional or generic identifiers in shared examples.
 
+Verify prerequisites before use:
+
+```sh
+bash --version
+jq --version
+shasum --version
+jsonschema --version
+```
+
 ## Authorize Implementation
 
 Complete `templates/implementation-authorization.md` separately from the request. A human must explicitly grant implementation authority for the listed workspace and files. Do not treat a prompt, issue, or agent assumption as approval.

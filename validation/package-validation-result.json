@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "bash",
+    "-n",
+    "scripts/establish-source-identity",
+    "scripts/run-and-capture",
+    "scripts/compare-workspaces",
+    "scripts/validate-evidence",
+    "tests/package-self-test"
+  ],
+  "workingDirectory": ".",
+  "startedAt": "2026-09-03T03:28:33Z",
+  "completedAt": "2026-09-03T03:28:36Z",
+  "exitCode": 0,
+  "status": "PASS",
+  "testCount": 19,
+  "passCount": 19,
+  "failCount": 0,
+  "artifactReferences": [
+    "validation/package-validation.log"
+  ],
+  "limitations": [
+    "This is a local Team Preview package; no CI or external-service validation was run.",
+    "Schema validation used the locally available jsonschema CLI."
+  ]
+}
