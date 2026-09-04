@@ -78,6 +78,24 @@ The local harness directory is: <harness-path>.
 Remain read-only. Return the setup checkpoint followed by the templated next-step instructions.
 ```
 
+### Optional Baseline: Map Application Entry Points
+
+After the human has reviewed a completed repository-readiness report, use this read-only follow-on action to map the UI, API, service, queue, worker, and scheduled-job paths that could affect a future change:
+
+```text
+Use <harness-path>/prompts/pre-change-application-entry-points.md.
+
+The target repository is: <application-workspace-path>.
+The completed readiness report is:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/repository-readiness.md.
+Return the report for a human to save at:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/application-entry-points.md.
+
+Do not modify the target repository, start services, access external systems, submit requests or messages, or create the report file unless I explicitly authorize that external write.
+```
+
+The report is contextual evidence only. If its current repository identity or `HEAD` does not match the readiness report, refresh readiness before using the map for change planning.
+
 Use a prompt like this for discovery:
 
 ```text

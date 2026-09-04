@@ -59,6 +59,7 @@ Copy templates into the change's evidence directory under the external harness c
 | Human artifact | Associated prompt | Purpose |
 | --- | --- | --- |
 | A [repository-readiness report](docs/pre-change-repository-readiness.md), such as `<harness-path>/evidence/<project-name>/readiness/<assessment-id>/repository-readiness.md` | [Pre-Change Repository Readiness Prompt](prompts/pre-change-repository-readiness.md) | Establishes a read-only architecture, history, quality-control, and candidate-pattern baseline before a change request. It never grants implementation or hardening authority. |
+| An [application entry-point report](docs/pre-change-application-entry-points.md), such as `<harness-path>/evidence/<project-name>/readiness/<assessment-id>/application-entry-points.md` | [Pre-Change Application Entry-Point Prompt](prompts/pre-change-application-entry-points.md) | Maps evidence-supported UI, API, service, queue, worker, and scheduled-job paths after readiness assessment. It never grants implementation or runtime authority. |
 | A copied [change request](templates/change-request.md), such as `<harness-path>/evidence/<project-name>/<change-id>/change-request.md` | [Discovery Prompt](prompts/01-discovery.md) | Gives a read-only agent the human's intent and boundaries. The agent identifies the owning code path, candidate files, conventions, validation, and open human decisions. |
 | A copied [implementation authorization](templates/implementation-authorization.md) | [Implementation Prompt](prompts/02-implementation.md) | Gives an edit-permitted agent the exact writable workspace, files, commands, prohibitions, and next action approved by a human. |
 | A completed [evidence packet](templates/change-evidence-packet.json) plus its evidence artifacts | [Evidence Repair Prompt](prompts/03-evidence-repair.md) | Allows evidence-only correction after a human classifies the evidence as incomplete; it must not change implementation source. |
@@ -69,8 +70,8 @@ Use the actual artifact path in the chat prompt. `<harness-path>/evidence/<proje
 ## Contents
 
 - `INSTALL-GITHUB-COPILOT.md`: local installation and operating guidance
-- `prompts/`: setup, readiness assessment, discovery, implementation, evidence repair, and PM closeout prompts
-- `docs/`: readiness-assessment guidance and report template
+- `prompts/`: setup, readiness assessment, entry-point mapping, discovery, implementation, evidence repair, and PM closeout prompts
+- `docs/`: readiness and entry-point guidance with report templates
 - `templates/`: request, authorization, packet, summary, decision, and measurement forms
 - `schema/`: JSON Schema for the evidence packet
 - `scripts/`: local identity, capture, comparison, and validation helpers
