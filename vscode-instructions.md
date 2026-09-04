@@ -56,11 +56,11 @@ Run the setup verification prompt in a new chat. It returns the next permitted a
    ```sh
    mkdir -p "<harness-path>/evidence/<Project Name>/<Change ID>"
    cp "<harness-path>/templates/change-request.md" \
-     "<harness-path>/evidence/<Project Name>/<Change ID>/first-change.md"
+     "<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md"
    ```
 
-3. Start the copied request file with what the human knows. It is normal for `<harness-path>/evidence/<Project Name>/<Change ID>/first-change.md` to be incomplete: fill in the intent, known constraints, and any decisions already made. Leave unknown fields blank rather than guessing. Do not treat this as implementation authorization.
-4. Run the discovery prompt below. The agent must remain read-only with respect to the application workspace. It inspects the local codebase, identifies unanswered fields, and makes evidence-based recommendations. Use a Q&A session to narrow each decision: ask what the agent recommends, ask what to consider, then accept, reject, or revise its recommendation. The agent may update `first-change.md` only after the human agrees to the values being recorded. Save its discovery response as `<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md` for human review.
+3. Start the copied `change-request.md` file with what the human knows. It is normal for `<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md` to be incomplete: fill in the intent, known constraints, and any decisions already made. Leave unknown fields blank rather than guessing. Each project/change folder has one canonical request file; do not create a second copy under another name. Do not treat this as implementation authorization.
+4. Run the discovery prompt below. The agent must remain read-only with respect to the application workspace. It inspects the local codebase, identifies unanswered fields, and makes evidence-based recommendations. Use a Q&A session to narrow each decision: ask what the agent recommends, ask what to consider, then accept, reject, or revise its recommendation. The agent may update `change-request.md` only after the human agrees to the values being recorded. Save its generated discovery response as `<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md` for human review. Do not copy or modify `<harness-path>/prompts/01-discovery.md`; it remains the reusable prompt.
 5. When the request is complete, a human reviews the discovery record and prepares the separate implementation authorization described below. The authorization must name the writable workspace, allowed files, commands, prohibited operations, and next permitted action.
 6. Run the implementation prompt below in a new edit-permitted session. The agent may edit only after the completed authorization is provided.
 7. Review the generated packet, summary, validation logs, and uncertainties. Stop at `HUMAN_REVIEW_ONLY` until a reviewer or PM records the next decision.
@@ -95,11 +95,11 @@ Create only this external harness evidence directory and copy only the change-re
 Do not create or modify files in the application workspace. Do not modify reusable files under <harness-path>/prompts/, templates/, scripts/, or schema/.
 ```
 
-Replace the placeholders with the actual files for this change. The request and discovery-record paths must be under `<harness-path>/evidence/<Project Name>/<Change ID>/`, never under the application workspace. For example, the request might be `<harness-path>/evidence/<Project Name>/<Change ID>/first-change.md`; that example is not a required filename.
+Replace the placeholders with the actual files for this change. The request and discovery-record paths must be under `<harness-path>/evidence/<Project Name>/<Change ID>/`, never under the application workspace. The canonical request is `change-request.md`; `discovery.md` is generated only after discovery completes. Do not copy either reusable prompt into the evidence directory.
 
 ### Use Discovery as a Decision Conversation
 
-You do not need every field in `first-change.md` before starting. Begin with the change intent and the facts you know, then let the agent use read-only repository evidence to surface the remaining decisions. It should give a concrete recommendation for each open or ambiguous field, explain the relevant evidence and trade-offs, and ask for your decision. Recommendations are proposals, not approval.
+You do not need every field in `change-request.md` before starting. Begin with the change intent and the facts you know, then let the agent use read-only repository evidence to surface the remaining decisions. It should give a concrete recommendation for each open or ambiguous field, explain the relevant evidence and trade-offs, and ask for your decision. Recommendations are proposals, not approval.
 
 Useful follow-up questions include:
 
@@ -109,7 +109,7 @@ Useful follow-up questions include:
 - `What is the narrowest safe option?`
 - `Revise the recommendation to account for <constraint>.`
 
-When you are ready, clearly accept, reject, or revise the recommendations by question number. For example: `Accept 5 and 9; revise 7 to use source-identity hashes; what do you recommend for 12?` If an acknowledgement could be ambiguous (for example, "all three" after four recommendations), clarify the question numbers before asking the agent to record anything. Once you agree to the final set, tell the agent to record those agreed values in `first-change.md`. It must change only the request file at this stage; source code, tests, configuration, and authorization files remain untouched.
+When you are ready, clearly accept, reject, or revise the recommendations by question number. For example: `Accept 5 and 9; revise 7 to use source-identity hashes; what do you recommend for 12?` If an acknowledgement could be ambiguous (for example, "all three" after four recommendations), clarify the question numbers before asking the agent to record anything. Once you agree to the final set, tell the agent to record those agreed values in `change-request.md`. It must change only the request file at this stage; source code, tests, configuration, and authorization files remain untouched.
 
 ### Prepare Human Implementation Authorization
 

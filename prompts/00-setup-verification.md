@@ -17,6 +17,6 @@ NEXT_PERMITTED_ACTION: HUMAN_PREPARES_CHANGE_REQUEST
 NEXT_STEP_INSTRUCTIONS:
 1. Human supplies a filesystem-safe project name and a change ID.
 2. Create <harness-path>/evidence/<Project Name>/<Change ID>/ outside the application workspace.
-3. Copy <harness-path>/templates/change-request.md to <harness-path>/evidence/<Project Name>/<Change ID>/first-change.md.
+3. Copy <harness-path>/templates/change-request.md to <harness-path>/evidence/<Project Name>/<Change ID>/change-request.md.
 4. Complete the known request fields, then start read-only discovery with <harness-path>/prompts/01-discovery.md.
 ```

@@ -58,17 +58,19 @@ Copy templates into the change's evidence directory under the external harness c
 
 | Human artifact | Associated prompt | Purpose |
 | --- | --- | --- |
-| A copied [change request](templates/change-request.md), such as `<harness-path>/evidence/<project-name>/<change-id>/first-change.md` | [Discovery Prompt](prompts/01-discovery.md) | Gives a read-only agent the human's intent and boundaries. The agent identifies the owning code path, candidate files, conventions, validation, and open human decisions. |
+| A [repository-readiness report](docs/pre-change-repository-readiness.md), such as `<harness-path>/evidence/<project-name>/readiness/<assessment-id>/repository-readiness.md` | [Pre-Change Repository Readiness Prompt](prompts/pre-change-repository-readiness.md) | Establishes a read-only architecture, history, quality-control, and candidate-pattern baseline before a change request. It never grants implementation or hardening authority. |
+| A copied [change request](templates/change-request.md), such as `<harness-path>/evidence/<project-name>/<change-id>/change-request.md` | [Discovery Prompt](prompts/01-discovery.md) | Gives a read-only agent the human's intent and boundaries. The agent identifies the owning code path, candidate files, conventions, validation, and open human decisions. |
 | A copied [implementation authorization](templates/implementation-authorization.md) | [Implementation Prompt](prompts/02-implementation.md) | Gives an edit-permitted agent the exact writable workspace, files, commands, prohibitions, and next action approved by a human. |
 | A completed [evidence packet](templates/change-evidence-packet.json) plus its evidence artifacts | [Evidence Repair Prompt](prompts/03-evidence-repair.md) | Allows evidence-only correction after a human classifies the evidence as incomplete; it must not change implementation source. |
 | A completed evidence packet, summary, and validation logs | [PM Closeout Prompt](prompts/04-pm-closeout.md) and [human decision](templates/human-decision.md) | Supports independent human review and records the next permitted decision. |
 
-Use the actual artifact path in the chat prompt. `<harness-path>/evidence/<project-name>/<change-id>/first-change.md` is an example, not a required filename or application-specific path.
+Use the actual artifact path in the chat prompt. `<harness-path>/evidence/<project-name>/<change-id>/change-request.md` is the canonical request-file pattern; `discovery.md` is generated after discovery, not copied from `prompts/`.
 
 ## Contents
 
 - `INSTALL-GITHUB-COPILOT.md`: local installation and operating guidance
-- `prompts/`: discovery, implementation, evidence repair, and PM closeout prompts
+- `prompts/`: setup, readiness assessment, discovery, implementation, evidence repair, and PM closeout prompts
+- `docs/`: readiness-assessment guidance and report template
 - `templates/`: request, authorization, packet, summary, decision, and measurement forms
 - `schema/`: JSON Schema for the evidence packet
 - `scripts/`: local identity, capture, comparison, and validation helpers
