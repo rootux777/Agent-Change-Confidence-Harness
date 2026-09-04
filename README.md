@@ -1,6 +1,6 @@
 # Agent Change Confidence Harness V0.1
 
-**Team Preview for a five-person development team using GitHub Copilot**
+**Team Preview for a five-person development team using coding agents**
 
 ## Mission
 
@@ -26,17 +26,23 @@ It does not prove complete correctness, security, privacy, production readiness,
 
 ## Workflow
 
-1. Write a bounded change request with explicit non-goals and authorized files.
-2. Run discovery and establish source identity before implementation.
-3. Grant human authorization for the exact scope.
-4. Implement only the authorized change and preserve behavior outside it.
-5. Capture focused validation with literal commands, working directories, timestamps, logs, and exit codes.
-6. Repair evidence only when the PM classifies the evidence as incomplete; preserve superseded evidence first.
-7. Compare the protected reference and working copy, excluding only documented generated directories and evidence output.
-8. Present the packet, summary, measurements, and uncertainties for human review.
-9. Record the human decision and stop at the declared next permitted action.
+1. Copy the change-request template and fill in whatever is already known.
+2. Submit the partial request to the read-only discovery prompt.
+3. The agent reads the request, inspects the relevant local code and tests, identifies missing values, and makes concrete recommendations where repository evidence supports them.
+4. The human accepts, rejects, or revises each recommendation. The agent repeats clarification until every required request field is complete.
+5. After human agreement, the agent may update the named request artifact with the agreed values. This does not grant implementation authority.
+6. Complete implementation authorization separately and grant only the exact scope.
+7. Establish source identity before implementation.
+8. Implement only the authorized change and preserve behavior outside it.
+9. Capture focused validation with literal commands, working directories, timestamps, logs, and exit codes.
+10. Repair evidence only when the PM classifies the evidence as incomplete; preserve superseded evidence first.
+11. Compare the protected reference and working copy, excluding only documented generated directories and evidence output.
+12. Present the packet, summary, measurements, and uncertainties for human review.
+13. Record the human decision and stop at the declared next permitted action.
 
 The draft template is a form, not a valid completed evidence packet: artifact paths are placeholders until real files exist. Run the validator only after populating the packet and evidence directory.
+
+The change request is intentionally different from the implementation authorization. A partial request is an input to an interactive discovery conversation; it is not permission to infer scope or edit code. Only explicit human agreement completes the request, and only the separate authorization artifact permits implementation.
 
 ## Team Preview Boundary
 
@@ -45,6 +51,19 @@ V0.1 was validated through one local .NET pilot only. That pilot demonstrates th
 ## Human Approval Boundaries
 
 Human approval must identify the writable workspace, protected reference if one exists, authorized files, allowed validation, prohibited operations, and the next permitted action. The harness does not grant permission. It makes granted scope easier to inspect and enforce.
+
+## Template and Prompt Map
+
+Copy templates into the change's evidence directory; do not edit the reusable files under `templates/`. A human owns the template artifacts. Prompts tell an agent how to use those artifacts without granting new authority.
+
+| Human artifact | Associated prompt | Purpose |
+| --- | --- | --- |
+| A copied [change request](templates/change-request.md), such as `evidence/<change-id>/first-change.md` | [Discovery Prompt](prompts/01-discovery.md) | Gives a read-only agent the human's intent and boundaries. The agent identifies the owning code path, candidate files, conventions, validation, and open human decisions. |
+| A copied [implementation authorization](templates/implementation-authorization.md) | [Implementation Prompt](prompts/02-implementation.md) | Gives an edit-permitted agent the exact writable workspace, files, commands, prohibitions, and next action approved by a human. |
+| A completed [evidence packet](templates/change-evidence-packet.json) plus its evidence artifacts | [Evidence Repair Prompt](prompts/03-evidence-repair.md) | Allows evidence-only correction after a human classifies the evidence as incomplete; it must not change implementation source. |
+| A completed evidence packet, summary, and validation logs | [PM Closeout Prompt](prompts/04-pm-closeout.md) and [human decision](templates/human-decision.md) | Supports independent human review and records the next permitted decision. |
+
+Use the actual artifact path in the chat prompt. `evidence/<change-id>/first-change.md` is an example, not a required filename or application-specific path.
 
 ## Contents
 

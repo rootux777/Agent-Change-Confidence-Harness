@@ -25,8 +25,8 @@ git -C tools/Agent-Change-Confidence-Harness pull --ff-only
 You should now see:
 
 ```
-OLT.CarePortal (1)/
-├── OLT.CarePortal.Core/
+your-application/
+├── src/
 └── tools/
     └── Agent-Change-Confidence-Harness/
         ├── README.md
@@ -44,7 +44,7 @@ Then, in your IDE:
 
 1. Open the local application project.
 2. Select **File → Add Folder to Workspace**.
-3. Add `/Users/YOURPATH/Agent-Change-Confidence-Harness`.
+3. Add the local `Agent-Change-Confidence-Harness` folder.
 
 Copilot should then see both workspace folders. Reference the harness with:
 
@@ -102,9 +102,22 @@ cp -R /path/to/Agent-Change-Confidence-Harness ./tools/Agent-Change-Confidence-H
 
 **Version-dependent guidance:** GitHub Copilot instruction discovery and repository customization locations can vary by editor, extension version, and team policy. Place prompts where your approved Copilot workflow can reference them; verify discovery behavior in the current editor before relying on it.
 
-## Supply A Change Request
+## Supply A Partial Change Request
 
-Start with `templates/change-request.md`. State the intent, exact authorized files, non-goals, privacy exclusions, validation command, and rollback. Use fictional or generic identifiers in shared examples.
+Start with `templates/change-request.md` and fill in the facts you already know. It is acceptable and expected to leave owning paths, exact files, event names, decision boundaries, validation commands, or other fields unresolved.
+
+Submit the partial request with `prompts/01-discovery.md`. The agent reads the request, inspects relevant local code and nearby tests without editing or running validation, identifies each missing or ambiguous value, and recommends concrete answers when repository evidence supports them. Review every recommendation with the human. The agent should ask follow-up questions and repeat until the human accepts or revises every required field.
+
+After the human agrees to the complete request, the agent may write the agreed values into the named request file. The agent must not silently infer authorization or begin implementation. Complete `templates/implementation-authorization.md` separately before any source edit.
+
+Example chat instruction:
+
+```text
+Read evidence/CHANGE-001/change-request.md and prompts/01-discovery.md.
+Treat the request as potentially incomplete. Inspect local code and tests read-only,
+recommend values for missing fields, and ask me to accept or revise them. Do not edit
+the request file until I agree to every recommendation. Do not implement anything.
+```
 
 Verify prerequisites before use:
 

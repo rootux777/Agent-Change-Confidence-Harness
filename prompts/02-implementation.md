@@ -1,6 +1,6 @@
 # Implementation Prompt
 
-Implement one bounded change only after explicit human authorization.
+Implement one bounded change only after explicit human authorization. Before starting, verify that the request artifact records the human's accepted or revised values for all required scope fields. If any request field is blank, a placeholder, or ambiguous, stop and return to `prompts/01-discovery.md`; do not infer it from the authorization form.
 
 Before editing:
 

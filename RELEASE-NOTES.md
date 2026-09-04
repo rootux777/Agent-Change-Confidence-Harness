@@ -19,6 +19,7 @@
 - Keep customer or business identifiers out of structured warning fields while making exception attachment explicit.
 - State whether JSON syntax was validated or schema conformance was actually validated.
 - Recheck source identity before accepting prior post-change validation as still applicable.
+- Treat partial change requests as the normal discovery input: make repository-grounded recommendations, ask for human agreement, and update the request artifact only after clarification is complete.
 
 ### Known Limitations
 
