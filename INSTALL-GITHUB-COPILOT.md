@@ -2,51 +2,32 @@
 
 ## Installation And Usability Test
 
-### 1. Add the harness to the project
+### 1. Keep the harness beside the project
 
-In the IDE terminal:
+Clone or download the harness into its own local directory, outside the application repository. For example:
 
 ```yaml
-cd "/YOUR PROJECT HERE"
-
-mkdir -p tools
-
 git clone --depth 1 \
   https://github.com/rootux777/Agent-Change-Confidence-Harness.git \
-  tools/Agent-Change-Confidence-Harness
+  "/path/to/Agent-Change-Confidence-Harness"
 ```
 
 If you already cloned it there, update it instead:
 
 ```
-git -C tools/Agent-Change-Confidence-Harness pull --ff-only
+git -C "/path/to/Agent-Change-Confidence-Harness" pull --ff-only
 ```
 
-You should now see:
+Open the application in VS Code. Then select **File → Add Folder to Workspace**, add the local `Agent-Change-Confidence-Harness` folder, and save the multi-root workspace. The harness remains separate from the application: its reusable prompts, templates, scripts, and schema are read-only, while its `evidence/` directory holds copied templates and change evidence.
+
+You should now see both folders in the VS Code workspace, for example:
 
 ```
 your-application/
-├── src/
-└── tools/
-    └── Agent-Change-Confidence-Harness/
-        ├── README.md
-        ├── prompts/
-        ├── templates/
-        ├── scripts/
-        └── schema/
+Agent-Change-Confidence-Harness/
 ```
 
-### Use existing local copies in one workspace
-
-If both the application project and the Agent Change Confidence Harness have already been downloaded locally, you can use them together without cloning the harness into `tools/`.
-
-Then, in your IDE:
-
-1. Open the local application project.
-2. Select **File → Add Folder to Workspace**.
-3. Add the local `Agent-Change-Confidence-Harness` folder.
-
-Copilot should then see both workspace folders. Reference the harness with:
+Reference the harness with its local path, or with the workspace folder name when the agent can resolve it:
 
 ```
 Agent-Change-Confidence-Harness/prompts/01-discovery.md
@@ -66,11 +47,11 @@ or execute the harness scripts.
 
 First, confirm that you can read these files:
 
-- tools/Agent-Change-Confidence-Harness/README.md
-- tools/Agent-Change-Confidence-Harness/INSTALL-GITHUB-COPILOT.md
-- tools/Agent-Change-Confidence-Harness/prompts/01-discovery.md
-- tools/Agent-Change-Confidence-Harness/templates/change-request.md
-- tools/Agent-Change-Confidence-Harness/templates/implementation-authorization.md
+- Agent-Change-Confidence-Harness/README.md
+- Agent-Change-Confidence-Harness/INSTALL-GITHUB-COPILOT.md
+- Agent-Change-Confidence-Harness/prompts/01-discovery.md
+- Agent-Change-Confidence-Harness/templates/change-request.md
+- Agent-Change-Confidence-Harness/templates/implementation-authorization.md
 
 Then:
 
@@ -88,15 +69,9 @@ FILES_MODIFIED: NONE
 NEXT_PERMITTED_ACTION: HUMAN_INPUT_ONLY
 ```
 
-## Add To A Local Project
+## Keep As A Local Tool
 
-Copy this package into a local, non-production workspace or add it as a local team tool directory. Keep the package outside application source and keep evidence output separate from application files. Do not publish or install it as a runtime dependency.
-
-Example:
-
-```sh
-cp -R /path/to/Agent-Change-Confidence-Harness ./tools/Agent-Change-Confidence-Harness
-```
+Keep this package outside application source and keep evidence output separate from application files. Do not copy the harness into the application repository, publish it, or install it as a runtime dependency. Add its downloaded or cloned directory to the VS Code multi-root workspace instead.
 
 **Verified in V0.1:** the package scripts use local shell commands, accept paths containing spaces when quoted, and do not require network access. The example packet validates with the `jsonschema` command available in the validation environment.
 
@@ -113,7 +88,7 @@ After the human agrees to the complete request, the agent may write the agreed v
 Example chat instruction:
 
 ```text
-Read evidence/CHANGE-001/change-request.md and prompts/01-discovery.md.
+Read <harness-path>/evidence/<project-name>/<change-id>/change-request.md and <harness-path>/prompts/01-discovery.md.
 Treat the request as potentially incomplete. Inspect local code and tests read-only,
 recommend values for missing fields, and ask me to accept or revise them. Do not edit
 the request file until I agree to every recommendation. Do not implement anything.

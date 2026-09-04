@@ -5,6 +5,7 @@ Implement one bounded change only after explicit human authorization. Before sta
 Before editing:
 
 - Confirm the authorized workspace and protected reference are separate.
+- Confirm that the authorization's evidence directory is under the external harness's `evidence/` directory, not under the authorized application workspace. Create and update only the approved evidence artifacts there.
 - Hash every authorized file before implementation.
 - Search for identifier conflicts.
 - Run only the authorized baseline validation.

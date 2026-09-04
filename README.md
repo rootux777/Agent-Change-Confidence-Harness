@@ -54,16 +54,16 @@ Human approval must identify the writable workspace, protected reference if one 
 
 ## Template and Prompt Map
 
-Copy templates into the change's evidence directory; do not edit the reusable files under `templates/`. A human owns the template artifacts. Prompts tell an agent how to use those artifacts without granting new authority.
+Copy templates into the change's evidence directory under the external harness checkout; do not edit the reusable files under `templates/`, and do not create harness artifacts in the application repository. A human owns the template artifacts. Prompts tell an agent how to use those artifacts without granting new authority.
 
 | Human artifact | Associated prompt | Purpose |
 | --- | --- | --- |
-| A copied [change request](templates/change-request.md), such as `evidence/<change-id>/first-change.md` | [Discovery Prompt](prompts/01-discovery.md) | Gives a read-only agent the human's intent and boundaries. The agent identifies the owning code path, candidate files, conventions, validation, and open human decisions. |
+| A copied [change request](templates/change-request.md), such as `<harness-path>/evidence/<project-name>/<change-id>/first-change.md` | [Discovery Prompt](prompts/01-discovery.md) | Gives a read-only agent the human's intent and boundaries. The agent identifies the owning code path, candidate files, conventions, validation, and open human decisions. |
 | A copied [implementation authorization](templates/implementation-authorization.md) | [Implementation Prompt](prompts/02-implementation.md) | Gives an edit-permitted agent the exact writable workspace, files, commands, prohibitions, and next action approved by a human. |
 | A completed [evidence packet](templates/change-evidence-packet.json) plus its evidence artifacts | [Evidence Repair Prompt](prompts/03-evidence-repair.md) | Allows evidence-only correction after a human classifies the evidence as incomplete; it must not change implementation source. |
 | A completed evidence packet, summary, and validation logs | [PM Closeout Prompt](prompts/04-pm-closeout.md) and [human decision](templates/human-decision.md) | Supports independent human review and records the next permitted decision. |
 
-Use the actual artifact path in the chat prompt. `evidence/<change-id>/first-change.md` is an example, not a required filename or application-specific path.
+Use the actual artifact path in the chat prompt. `<harness-path>/evidence/<project-name>/<change-id>/first-change.md` is an example, not a required filename or application-specific path.
 
 ## Contents
 

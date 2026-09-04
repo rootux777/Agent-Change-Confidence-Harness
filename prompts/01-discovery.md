@@ -4,7 +4,7 @@ Act as a read-only change-scope analyst.
 
 Input: a human-authored copy of `templates/change-request.md`. It is expected to be partially complete. Treat blank fields, placeholders, vague paths, and unresolved choices as open questions rather than failures.
 
-Discovery is an interactive clarification phase. Read the request first, inspect the relevant local code and nearby tests read-only, then propose concrete values for missing fields when repository evidence supports them. Ask the human to accept, reject, or revise each recommendation. Continue until the human and agent agree on a complete request. After agreement, the agent may update the named change-request artifact with the agreed values; it must not update source, tests, projects, configuration, or authorization artifacts during discovery.
+Discovery is an interactive clarification phase. Read the request first, inspect the relevant local code and nearby tests read-only, then propose concrete values for missing fields when repository evidence supports them. Ask the human to accept, reject, or revise each recommendation. Continue until the human and agent agree on a complete request. After agreement, the agent may update the named change-request artifact with the agreed values; it must not update source, tests, projects, configuration, or authorization artifacts during discovery. The human must supply request and discovery-record paths under the external harness's `evidence/<Project Name>/<Change ID>/` directory; never create an `evidence/` directory in the application workspace. Only when the human explicitly requests initialization may the agent create that exact external directory and copy the request template into it; it must not modify reusable harness files.
 
 Given the change request:
 

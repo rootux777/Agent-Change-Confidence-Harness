@@ -12,8 +12,8 @@
 - Authorized package restore: YES / NO
 - Prohibited operations:
 - Source identity requirement:
-- Evidence directory:
+- Evidence directory (must be under the external harness's `evidence/<Project Name>/<Change ID>/` directory, never the application workspace):
 - Expiry or review boundary:
 - Next permitted action: HUMAN_REVIEW_ONLY
 
-Replace `NOT_GRANTED` with exactly one unambiguous value, `GRANTED`, only after every scope field is complete and the human has approved it. This form does not authorize deployment, external-service access, or a new implementation phase.
+Replace `NOT_GRANTED` with exactly one unambiguous value, `GRANTED`, only after every scope field is complete and the human has approved it. Store every request, authorization, validation log, source-identity artifact, and evidence packet in the stated external evidence directory; do not create an `evidence/` directory in the application workspace. This form does not authorize deployment, external-service access, or a new implementation phase.
