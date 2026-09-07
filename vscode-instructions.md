@@ -2,6 +2,10 @@
 
 This guide is for developers using VS Code with Codex or Claude. The harness guides a change workflow; it does not automatically authorize edits or replace human review.
 
+## Start the Initial Agent Chat
+
+After adding the harness folder to the VS Code workspace, the human may paste this `vscode-instructions.md` guide into the initial agent chat. This gives the agent the same workflow context as the human, including the required handoffs and approval boundaries. Pasting the guide does not authorize edits, commands, external access, or evidence writes; the human must still provide each later prompt and any required authorization explicitly.
+
 ## One-Time Workspace Setup
 
 1. Keep this harness in its own local directory, outside the application repository. In VS Code, open the application folder, then select **File → Add Folder to Workspace** and add the harness directory. Save the resulting multi-root workspace if you want to reuse it. In this guide, `<harness-path>` means that separate local directory; replace it with its actual path in shell commands and agent prompts. Do not copy the harness into the application repository. When you record this path in a shared instruction file, prefer a relative path such as `../Agent-Change-Confidence-Harness` rather than a user-specific absolute path.
@@ -77,6 +81,64 @@ The application workspace is: <application-workspace-path>.
 The local harness directory is: <harness-path>.
 Remain read-only. Return the setup checkpoint followed by the templated next-step instructions.
 ```
+
+### Step 2: Assess Readiness and Save the Report
+
+For an unfamiliar application, run readiness before the first change request. Supply a filesystem-safe project name and assessment ID, and replace every placeholder. This prompt authorizes only the external report write; the application remains read-only.
+
+```text
+Use <harness-path>/prompts/pre-change-repository-readiness.md.
+The target repository is: <application-workspace-path>.
+The assessment ID is: <Assessment ID>.
+The external evidence directory is:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/.
+
+I authorize you to create repository-readiness.md in that directory
+and create its necessary parent directories. Do not overwrite an
+existing report. Use the report template in
+<harness-path>/docs/pre-change-repository-readiness.md.
+
+Do not modify the application, run builds, tests, linters or scanners,
+install dependencies, or access external services.
+Verify the saved report, then return its clickable path, key findings,
+recommendation IDs, uncertainties, and assessment status in chat.
+If saving fails, return the full report and state that it was not saved.
+```
+
+Open the saved Markdown file in VS Code and review its evidence, quality-control matrix, gaps, and proposed gates. A saved report can still be incomplete or blocked. Resolve relevant gaps before using it to scope work. `READY_FOR_HUMAN_BASELINE_REVIEW` asks for your review; it does not approve changes.
+
+### Step 3: Link the First Change Request to Readiness
+
+Use the existing `templates/change-request.md`; its **Readiness Context and First-Change Scope** section is the reusable handoff for future applications. Follow the Per-Change Workflow to copy it into the change's external evidence directory. Record the report path, assessment identity, your baseline review, and one selected recommendation ID. Leave unknown implementation details for discovery.
+
+This is where you can propose linting, static analysis, or a bounded refactor. Prefer an existing check in check-only mode for a first quality baseline. Adding a tool or fixing findings requires its own explicit scope. Refactoring should preserve named behavior and have supporting tests. Do not combine an initial baseline with broad formatting or automatic cleanup. Readiness and discovery do not execute these checks.
+
+After copying the request and filling in the known fields, use:
+
+```text
+Use <harness-path>/prompts/01-discovery.md.
+The current change request is:
+<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md.
+The readiness report is:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/repository-readiness.md.
+My baseline review decision is: <accepted context and unresolved concerns>.
+My selected recommendation is: <recommendation ID and intended outcome>.
+
+Read the report and request, compare the report's repository identity,
+HEAD, and relevant working-tree state with the current repository,
+and identify stale or missing evidence before relying on it.
+Recommend the smallest scope, exact commands and working directories,
+prerequisites, command side effects, evidence paths, acceptance criteria,
+and treatment of existing findings. If refactoring is selected, identify
+behavior invariants and supporting tests.
+
+Remain read-only. Do not run checks or modify files. Ask me to accept
+or revise unresolved values before recording them in the request.
+Return the discovery record for me to save at:
+<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md.
+```
+
+Once the request is agreed, follow **Prepare Human Implementation Authorization** below. Even a check-only run needs the exact commands and writable outputs authorized. Keep the readiness report unchanged as baseline evidence and capture execution results under the change directory.
 
 ### Optional Baseline: Map Application Entry Points
 

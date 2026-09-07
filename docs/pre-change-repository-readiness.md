@@ -9,9 +9,10 @@ The readiness assessment is not a substitute for the harness change request. It 
 ```text
 Read-only readiness assessment
   -> human baseline review
-  -> optional, separately authorized hardening change
-  -> normal change request discovery
+  -> saved report linked from a bounded change request
+  -> read-only discovery
   -> separate implementation authorization
+  -> authorized checks or implementation and evidence review
 ```
 
 The target repository remains read-only during assessment. The report belongs in the external harness evidence directory, for example:
@@ -73,6 +74,21 @@ At human baseline review, choose one of these paths:
 - Mark the assessment incomplete or blocked pending missing evidence.
 
 Hardening—such as adding linting, CI, hooks, security scanning, or agent instructions—is a change. It requires a normal completed request and a separate implementation authorization. Do not bundle broad formatting or unrelated hardening into a functional change.
+
+Use the **Readiness Context and First-Change Scope** section of `templates/change-request.md` to link the saved Markdown report, record human review, and select one recommendation ID. Discovery verifies that the report still matches the repository before using it. Keep the report as baseline evidence; record later execution results in the change's evidence directory.
+
+For an initial quality-control task, prefer a check-only baseline using existing linting or static-analysis tooling when supported by the report. Specify commands, side effects, evidence output, and treatment of existing findings. If tooling is absent, propose one bounded control addition. Refactoring is optional and requires an explicit behavior-preservation goal and supporting validation; readiness findings alone do not justify broad cleanup.
+
+To have the agent save the report, replace the chat-only delivery instruction in the assessment prompt with:
+
+```text
+I authorize you to create only the following external Markdown report
+and its necessary parent directories:
+<harness-path>/evidence/<project-name>/readiness/<assessment-id>/repository-readiness.md.
+Do not overwrite an existing report. Verify the saved file, then return
+its clickable path, key findings, recommendation IDs, uncertainties,
+and assessment status in chat. The target repository remains read-only.
+```
 
 ## Non-Goals and Stop Conditions
 
@@ -163,9 +179,9 @@ Stop and report `UNKNOWN`, `BLOCKED_MISSING_EVIDENCE`, `BLOCKED_UNSAFE_REPOSITOR
 
 ## Gaps and Proposed Gates
 
-| Priority | Current condition | Evidence | Proposed control | Benefit | Adoption and broad-change risk | Expected files | Human authorization required |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 |  |  |  |  |  |  | YES |
+| Recommendation ID | Priority | Current condition | Evidence | Proposed control | Benefit | Adoption and broad-change risk | Expected files | Human authorization required |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| R-01 | 1 |  |  |  |  |  |  | YES |
 
 ## Risks and Unresolved Questions
 
@@ -184,6 +200,6 @@ Stop and report `UNKNOWN`, `BLOCKED_MISSING_EVIDENCE`, `BLOCKED_UNSAFE_REPOSITOR
 ## Human Authorization Checkpoint
 
 - Baseline reviewed by:
-- Decision: ACCEPT_CONTEXT / REQUEST_FOLLOW_UP / AUTHORIZE_SEPARATE_CHANGE / BLOCKED
+- Decision: ACCEPT_CONTEXT / REQUEST_FOLLOW_UP / PROPOSE_SEPARATE_CHANGE / BLOCKED
 - No implementation authority granted by this report: YES
 ```

@@ -105,7 +105,7 @@ Never treat a pattern as blessed merely because it is newest, most common, or mo
 
 Compare observed controls with the minimum practical controls for the detected stack. Recommendations may cover instructions, formatting/linting, static analysis, focused and full tests, hooks, CI/review validation, security scanning, independent-agent review, and human adversarial review.
 
-For every recommendation, provide current condition, evidence, proposed control, benefit, adoption risk, expected repository files affected, broad-reformatting or unrelated-change risk, suggested order, and required human authorization. Prefer incremental adoption; do not recommend an initial change likely to broadly reformat the repository or obscure future functional changes.
+Assign each recommendation a stable report-local ID such as `R-01`; retain IDs when discussing that report. For every recommendation, provide current condition, evidence, proposed control, benefit, adoption risk, expected repository files affected, broad-reformatting or unrelated-change risk, suggested order, and required human authorization. Prefer incremental adoption; do not recommend an initial change likely to broadly reformat the repository or obscure future functional changes.
 
 ## Required Output
 
@@ -122,6 +122,14 @@ Return a Markdown report using the template in `docs/pre-change-repository-readi
 9. Gaps and proposed gates.
 10. Risks, unresolved questions, and commands executed with concise results.
 11. Recommended next action and human authorization checkpoint.
+
+## Report Delivery and Handoff
+
+Use the supplied external destination for `repository-readiness.md`. When the human explicitly authorizes saving it, create only that report and necessary parent directories outside the target repository. Do not overwrite an existing report; request a new assessment destination. Verify the saved Markdown can be read and includes repository identity, HEAD, working-tree state, recommendation IDs, and final status. If writing fails, return the full report in chat and state that it was not saved.
+
+Without external-write authorization, return the full Markdown report in chat for the human to save. Never claim an artifact exists unless verified. For a saved report, return its clickable path, a concise summary of findings and uncertainties, and the recommendation IDs proposed for human review. An incomplete or blocked report must retain that status when saved.
+
+After baseline review, direct the human to copy `templates/change-request.md` into the change evidence directory and complete its Readiness Context and First-Change Scope section with this report's path and one selected recommendation. Do not choose the human's change ID, accept recommendations on their behalf, or create implementation authorization.
 
 End with exactly one status:
 

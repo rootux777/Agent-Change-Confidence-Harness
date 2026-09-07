@@ -26,6 +26,8 @@ It does not prove complete correctness, security, privacy, production readiness,
 
 ## Workflow
 
+For VS Code with Codex or Claude, start with [vscode-instructions.md](vscode-instructions.md). For an unfamiliar repository, its recommended path is setup verification, a saved readiness report, human baseline review, and a first change request linked to one report recommendation. The request template includes readiness context and scope for a lint/static-analysis baseline, control addition, bounded refactor, or functional change. Checks run only after separate authorization.
+
 1. Copy the change-request template and fill in whatever is already known.
 2. Submit the partial request to the read-only discovery prompt.
 3. The agent reads the request, inspects the relevant local code and tests, identifies missing values, and makes concrete recommendations where repository evidence supports them.
