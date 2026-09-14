@@ -3,6 +3,8 @@
 - Change ID:
 - Requested by:
 - Intent:
+- Change profile: STANDARD / LINT_STATIC_ANALYSIS_BASELINE / BOUNDED_REFACTOR / DATABASE_DATA_CONTRACT_REVIEW
+- Supporting profile path, or NOT_APPLICABLE:
 - Owning code path:
 - Authorized workspace:
 - Protected reference:
@@ -19,6 +21,13 @@
 - Rollback:
 - Requested human decision:
 
+Use exactly one change profile. `change-request.md` remains the canonical request
+for every profile. When the selected profile is `LINT_STATIC_ANALYSIS_BASELINE`,
+`BOUNDED_REFACTOR`, or `DATABASE_DATA_CONTRACT_REVIEW`, complete the corresponding
+companion template and record its path above. The companion supplies
+profile-specific discovery detail; it is not a second authorization and does not
+replace this request.
+
 ## Readiness Context and First-Change Scope
 
 For a readiness-driven request, complete these fields from the saved report and human review. Otherwise mark this section `NOT_APPLICABLE` with a reason. This is part of the canonical change request, not a separate request or authorization.
@@ -30,7 +39,7 @@ For a readiness-driven request, complete these fields from the saved report and 
 - Selected recommendation ID and report section:
 - Evidence supporting this selection:
 - Current repository identity / HEAD and working-tree comparison (discovery):
-- First-change type: CHECK_ONLY_BASELINE / ADD_OR_ADJUST_CONTROL / BOUNDED_REFACTOR / FUNCTIONAL_CHANGE
+- First-change type: CHECK_ONLY_BASELINE / ADD_OR_ADJUST_CONTROL / BOUNDED_REFACTOR / DATABASE_DATA_CONTRACT_REVIEW / FUNCTIONAL_CHANGE
 - Intended measurable outcome and acceptance criteria:
 - Existing findings policy (record baseline, permitted new findings, deferred findings):
 - Exact check commands and working directories (proposed until authorized):

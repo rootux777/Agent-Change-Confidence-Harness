@@ -24,13 +24,14 @@ After adding the harness folder to the VS Code workspace, the human may paste th
 
    Use this workflow for a requested code change. The harness makes change scope and evidence reviewable; it does not grant permission to modify code, access services, or deploy.
 
-   1. Before editing, obtain a completed change request with the intended behavior, exact authorized files, non-goals, privacy exclusions, validation command, and rollback plan. Follow `<harness-path>/prompts/01-discovery.md` for read-only discovery.
-   2. Do not edit until a human has completed `<harness-path>/templates/implementation-authorization.md`. Treat only the listed workspace, files, permitted commands, and next action as authorized.
-   3. Before and after an authorized change, use `<harness-path>/scripts/establish-source-identity` to hash each authorized file. Use `<harness-path>/scripts/compare-workspaces` against a protected reference when one is available.
-   4. Implement only the approved scope. Follow `<harness-path>/prompts/02-implementation.md`; preserve stated behavior outside that scope. Add code comments only for non-obvious intent or constraints, and add application logging or telemetry only when its event, level, fields, and destination are authorized.
-   5. Capture focused validation with `<harness-path>/scripts/run-and-capture`, then record the outcome in `<harness-path>/templates/change-evidence-packet.json` and validate it with `<harness-path>/scripts/validate-evidence`.
-   6. Never include passwords, access tokens, API keys, personal identifiers, request payloads, raw exception contents, or other sensitive values in command arguments, logs, or evidence artifacts.
-   7. Once the packet is complete, stop at `HUMAN_REVIEW_ONLY`. A reviewer or PM must make the next decision using the supplied summary and decision templates.
+   1. For an unfamiliar application, establish readiness first. When the application performs consequential state changes, sends external instructions, or spans components whose behavior must be reconciled, create a project-specific copy of `<harness-path>/templates/consequential-action-inventory.md` after readiness and entry-point mapping and before selecting the dependent change.
+   2. Before editing, obtain a completed change request with the intended behavior, exact authorized files, non-goals, privacy exclusions, validation command, and rollback plan. Follow `<harness-path>/prompts/01-discovery.md` for read-only discovery.
+   3. Do not edit until a human has completed `<harness-path>/templates/implementation-authorization.md`. Treat only the listed workspace, files, permitted commands, and next action as authorized.
+   4. Before and after an authorized change, use `<harness-path>/scripts/establish-source-identity` to hash each authorized file. Use `<harness-path>/scripts/compare-workspaces` against a protected reference when one is available.
+   5. Implement only the approved scope. Follow `<harness-path>/prompts/02-implementation.md`; preserve stated behavior outside that scope. Add code comments only for non-obvious intent or constraints, and add application logging or telemetry only when its event, level, fields, and destination are authorized.
+   6. Capture focused validation with `<harness-path>/scripts/run-and-capture`, then record the outcome in `<harness-path>/templates/change-evidence-packet.json` and validate it with `<harness-path>/scripts/validate-evidence`.
+   7. Never include passwords, access tokens, API keys, personal identifiers, request payloads, raw exception contents, or other sensitive values in command arguments, logs, or evidence artifacts.
+   8. Once the packet is complete, stop at `HUMAN_REVIEW_ONLY`. A reviewer or PM must make the next decision using the supplied summary and decision templates.
 
    Keep every request, authorization, log, and evidence artifact in `<harness-path>/evidence/`, outside the application workspace. Do not create an `evidence/` directory in the application repository. Do not change or overwrite prior evidence without preserving the superseded copy. Treat the harness's reusable prompts, templates, scripts, and schema as read-only; only its change-specific `evidence/` directory may be updated.
    ```
@@ -52,7 +53,61 @@ jsonschema --version
 
 Run the setup verification prompt in a new chat. It returns the next permitted action, so the user does not need to infer the next step.
 
+## Artifact Order for an Unfamiliar Application
+
+Use the artifacts in this order. Conditional artifacts are selected from the
+observed application and the human's intended outcome; their existence never
+authorizes implementation.
+
+1. **Setup checkpoint** — verify the separate application and harness locations.
+2. **`repository-readiness.md`** — establish repository identity, architecture,
+   quality controls, risks, and evidence gaps.
+3. **`application-entry-points.md`** (optional) — map registered UI, API, service,
+   queue, worker, webhook, and scheduled-job entry points.
+4. **`consequential-action-inventory.md`** (conditional) — use when the application
+   changes material state, sends external instructions, affects customers or
+   money, or spans components that must be reconciled. It records stable Action
+   IDs, separate control/outcome evidence, SHA-256 fingerprints for cited source,
+   and verified cross-system Bridge IDs.
+5. **`change-request.md`** — select one bounded outcome informed by the accepted
+   baseline evidence.
+6. **Focused profile** (conditional) — add
+   `templates/lint-static-analysis-baseline.md` or
+   `templates/bounded-refactor-change-request.md`, or
+   `templates/database-data-contract-review.md` when that profile applies; the
+   canonical request remains `templates/change-request.md`.
+7. **`implementation-authorization.md`** — the separate human grant naming exact
+   files, commands, outputs, prohibitions, and expiry.
+8. **Implementation evidence** — source identity, workspace comparison, validation
+   logs, `change-evidence-packet.json`, and `change-summary.md`.
+9. **`human-decision.md`** — acceptance, requested changes, or more-evidence
+   decision and the next permitted action.
+
+The consequential-action inventory is not required for every task. It is useful
+when a proposed change depends on understanding who can initiate an action, which
+resource it affects, what authority is checked, where an instruction goes, and
+whether the business outcome is actually confirmed. Mark it not applicable with
+a reason for work that has no relevant consequential flow. Use its reconciliation
+section when multiple components participate or when initiation and confirmation
+occur in different code paths.
+
+Use `templates/database-data-contract-review.md` when the intended decision needs
+evidence about schema definitions, migration history or drift, integrity controls,
+data quality, or whether one datum retains compatible meaning and constraints
+across UI, API, domain, ORM, database, ETL, reporting, and external consumers.
+Static source inspection remains read-only discovery. Local analyzers, schema
+comparisons, database metadata connections, and bounded data profiling require
+separate authorization at the exact authority level recorded by the profile.
+Database or data-contract remediation is a later, separately scoped change.
+
 ## Per-Change Workflow
+
+For an unfamiliar application, complete and review the applicable baseline stages
+in **Artifact Order for an Unfamiliar Application** before starting this workflow.
+Do not bypass a required consequential-action inventory by creating a change ID
+first. For later changes, reuse accepted baseline evidence only after confirming
+that its repository identities, hashes, scope, and unresolved findings remain
+current.
 
 1. Obtain the project name and assign a change ID. The human supplies both; an agent must not invent either. Use a filesystem-safe project name and the team's ticket or change ID.
 2. Create the project and change evidence directory in the external harness, then copy the request template into it. Replace `<Project Name>` and `<Change ID>` before running these commands. Never create either directory in the application workspace or under the harness's `prompts/` directory:
@@ -63,7 +118,7 @@ Run the setup verification prompt in a new chat. It returns the next permitted a
      "<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md"
    ```
 
-3. Start the copied `change-request.md` file with what the human knows. It is normal for `<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md` to be incomplete: fill in the intent, known constraints, and any decisions already made. Leave unknown fields blank rather than guessing. Each project/change folder has one canonical request file; do not create a second copy under another name. Do not treat this as implementation authorization.
+3. Start the copied `change-request.md` file with what the human knows. It is normal for `<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md` to be incomplete: fill in the intent, known constraints, and any decisions already made. Leave unknown fields blank rather than guessing. Each project/change folder has one canonical request file; do not create a second canonical request under another name. When the selected profile is lint/static-analysis baseline, bounded refactor, or database/data-contract review, copy the matching companion template into the same change directory and record its path in the canonical request. A companion adds profile-specific detail; it is not another authorization. Do not treat any request or profile as implementation authorization.
 4. Run the discovery prompt below. The agent must remain read-only with respect to the application workspace. It inspects the local codebase, identifies unanswered fields, and makes evidence-based recommendations. Use a Q&A session to narrow each decision: ask what the agent recommends, ask what to consider, then accept, reject, or revise its recommendation. The agent may update `change-request.md` only after the human agrees to the values being recorded. Save its generated discovery response as `<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md` for human review. Do not copy or modify `<harness-path>/prompts/01-discovery.md`; it remains the reusable prompt.
 5. When the request is complete, a human reviews the discovery record and prepares the separate implementation authorization described below. The authorization must name the writable workspace, allowed files, commands, prohibited operations, and next permitted action.
 6. Run the implementation prompt below in a new edit-permitted session. The agent may edit only after the completed authorization is provided.
@@ -107,40 +162,7 @@ If saving fails, return the full report and state that it was not saved.
 
 Open the saved Markdown file in VS Code and review its evidence, quality-control matrix, gaps, and proposed gates. A saved report can still be incomplete or blocked. Resolve relevant gaps before using it to scope work. `READY_FOR_HUMAN_BASELINE_REVIEW` asks for your review; it does not approve changes.
 
-### Step 3: Link the First Change Request to Readiness
-
-Use the existing `templates/change-request.md`; its **Readiness Context and First-Change Scope** section is the reusable handoff for future applications. Follow the Per-Change Workflow to copy it into the change's external evidence directory. Record the report path, assessment identity, your baseline review, and one selected recommendation ID. Leave unknown implementation details for discovery.
-
-This is where you can propose linting, static analysis, or a bounded refactor. Prefer an existing check in check-only mode for a first quality baseline. Adding a tool or fixing findings requires its own explicit scope. Refactoring should preserve named behavior and have supporting tests. Do not combine an initial baseline with broad formatting or automatic cleanup. Readiness and discovery do not execute these checks.
-
-After copying the request and filling in the known fields, use:
-
-```text
-Use <harness-path>/prompts/01-discovery.md.
-The current change request is:
-<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md.
-The readiness report is:
-<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/repository-readiness.md.
-My baseline review decision is: <accepted context and unresolved concerns>.
-My selected recommendation is: <recommendation ID and intended outcome>.
-
-Read the report and request, compare the report's repository identity,
-HEAD, and relevant working-tree state with the current repository,
-and identify stale or missing evidence before relying on it.
-Recommend the smallest scope, exact commands and working directories,
-prerequisites, command side effects, evidence paths, acceptance criteria,
-and treatment of existing findings. If refactoring is selected, identify
-behavior invariants and supporting tests.
-
-Remain read-only. Do not run checks or modify files. Ask me to accept
-or revise unresolved values before recording them in the request.
-Return the discovery record for me to save at:
-<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md.
-```
-
-Once the request is agreed, follow **Prepare Human Implementation Authorization** below. Even a check-only run needs the exact commands and writable outputs authorized. Keep the readiness report unchanged as baseline evidence and capture execution results under the change directory.
-
-### Optional Baseline: Map Application Entry Points
+### Step 3 (Optional): Map Application Entry Points
 
 After the human has reviewed a completed repository-readiness report, use this read-only follow-on action to map the UI, API, service, queue, worker, and scheduled-job paths that could affect a future change:
 
@@ -157,6 +179,97 @@ Do not modify the target repository, start services, access external systems, su
 ```
 
 The report is contextual evidence only. If its current repository identity or `HEAD` does not match the readiness report, refresh readiness before using the map for change planning.
+
+### Step 4 (Conditional): Inventory and Reconcile Consequential Actions
+
+After readiness and, when useful, entry-point mapping, use the consequential-action
+inventory when the application changes material state, sends customer- or
+money-affecting instructions, integrates with external systems, or requires two or
+more components to be reconciled. It turns entry-point candidates into a
+control-and-outcome map before a dependent change is selected.
+
+Create a project-specific copy outside the application repository. Replace every
+placeholder and choose a new inventory ID supplied by the human:
+
+```sh
+mkdir -p "<harness-path>/evidence/<Project Name>/discovery/<Inventory ID>"
+cp "<harness-path>/templates/consequential-action-inventory.md" \
+  "<harness-path>/evidence/<Project Name>/discovery/<Inventory ID>/consequential-action-inventory.md"
+```
+
+Then use this prompt:
+
+```text
+Use the instructions and output structure in:
+<harness-path>/evidence/<Project Name>/discovery/<Inventory ID>/consequential-action-inventory.md.
+
+The application components to inspect are:
+- <component name>: <absolute repository path>
+- <component name>: <absolute repository path>
+
+The accepted readiness report is:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/repository-readiness.md.
+
+The entry-point report, or NONE, is:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/application-entry-points.md.
+
+Remain read-only in every application repository. Build the component registry,
+SHA-256 evidence manifest, Action Tables A and B, cross-system Bridge table,
+reconciliation summary, coverage statement, and consistency checks. Inspect both
+sides before marking a Bridge VERIFIED. Distinguish authentication, resource
+access, action-specific authority, transport success, and confirmed business
+outcome. Do not infer missing counterparts or completion.
+
+I authorize updates only to this external inventory artifact and necessary hash
+artifacts under its existing discovery directory. Do not modify application
+files, install dependencies, run application code, access external systems, or
+create implementation artifacts. Stop at HUMAN_REVIEW_ONLY.
+```
+
+SHA-256 values in this inventory are content fingerprints for the exact cited
+source files, not permanent file IDs and not proof of malicious tampering. Hash
+every cited file; hash an entire declared scope only when full-scope drift
+detection is explicitly requested and precisely bounded. A hash mismatch means
+the dependent finding must be reread and reverified.
+
+Review and accept, revise, or reject the inventory before using one of its findings
+to initialize `change-request.md`. The inventory is baseline evidence only. It
+does not replace a change request or implementation authorization.
+
+### Step 5: Link the First Change Request to Accepted Baseline Evidence
+
+Use the existing `templates/change-request.md`; its **Readiness Context and First-Change Scope** section is the reusable handoff for future applications. Follow the Per-Change Workflow to copy it into the change's external evidence directory. Record the readiness report path, assessment identity, your baseline review, and one selected recommendation or inventory finding. When entry-point or consequential-action evidence informed the selection, record those artifact paths and stable IDs as well. Leave unknown implementation details for discovery.
+
+This is where you can propose linting, static analysis, a bounded refactor, or a database/data-contract review. Prefer an existing check in check-only mode for a first quality baseline. Adding a tool or fixing findings requires its own explicit scope. Refactoring should preserve named behavior and have supporting tests. Database review must select an authority level and distinguish static source, expected schema, migrations, observed database metadata, and data profiling. Do not combine an initial baseline with broad formatting, automatic cleanup, schema mutation, or remediation. Readiness, entry-point mapping, inventory, reconciliation, and discovery do not execute these checks or authorize database access.
+
+After copying the request and filling in the known fields, use:
+
+```text
+Use <harness-path>/prompts/01-discovery.md.
+The current change request is:
+<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md.
+The readiness report is:
+<harness-path>/evidence/<Project Name>/readiness/<Assessment ID>/repository-readiness.md.
+The accepted consequential-action inventory, or NONE, is:
+<harness-path>/evidence/<Project Name>/discovery/<Inventory ID>/consequential-action-inventory.md.
+My baseline review decision is: <accepted context and unresolved concerns>.
+My selected recommendation or finding is: <stable ID and intended outcome>.
+
+Read the report, applicable inventory, and request. Compare their repository
+identities, HEADs, hashes, and relevant working-tree states with the current
+repositories, and identify stale or missing evidence before relying on it.
+Recommend the smallest scope, exact commands and working directories,
+prerequisites, command side effects, evidence paths, acceptance criteria,
+and treatment of existing findings. If refactoring is selected, identify
+behavior invariants and supporting tests.
+
+Remain read-only. Do not run checks or modify files. Ask me to accept
+or revise unresolved values before recording them in the request.
+Return the discovery record for me to save at:
+<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md.
+```
+
+Once the request is agreed, follow **Prepare Human Implementation Authorization** below. Even a check-only run needs the exact commands and writable outputs authorized. Keep accepted baseline artifacts unchanged and capture execution results under the change directory.
 
 Use a prompt like this for discovery:
 
