@@ -165,6 +165,10 @@ Select exactly one change profile and, when applicable, copy one companion:
 - For a database, migration/drift, data-quality, or cross-layer contract review,
   select `DATABASE_DATA_CONTRACT_REVIEW` and copy
   `templates/database-data-contract-review.md`.
+- For a migration proposed after an accepted database/data-contract review, use a
+  new Change ID, select `DATABASE_MIGRATION`, and copy
+  `templates/database-migration-change-request.md`. Review findings and prior
+  authorization do not authorize the migration.
 - For other bounded work, select `STANDARD`; no companion is required.
 
 Record the companion's change-specific path in the canonical request. A

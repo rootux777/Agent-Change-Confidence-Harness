@@ -74,7 +74,8 @@ authorizes implementation.
 6. **Focused profile** (conditional) — add
    `templates/lint-static-analysis-baseline.md` or
    `templates/bounded-refactor-change-request.md`, or
-   `templates/database-data-contract-review.md` when that profile applies; the
+   `templates/database-data-contract-review.md`, or
+   `templates/database-migration-change-request.md` when that profile applies; the
    canonical request remains `templates/change-request.md`.
 7. **`implementation-authorization.md`** — the separate human grant naming exact
    files, commands, outputs, prohibitions, and expiry.
@@ -100,6 +101,38 @@ comparisons, database metadata connections, and bounded data profiling require
 separate authorization at the exact authority level recorded by the profile.
 Database or data-contract remediation is a later, separately scoped change.
 
+### If Your Work Is Database-Related
+
+The harness provides two database-specific profiles with different purposes:
+
+| Human need | Use | What it provides |
+|---|---|---|
+| Understand a database before proposing changes | `templates/database-data-contract-review.md` | Static schema and migration review, control inventory, cross-layer data-contract mapping, optional separately authorized metadata/data-quality checks, stable findings, and unresolved business decisions |
+| Plan an actual schema or data migration after review | `templates/database-migration-change-request.md` | Source/target ownership, phased migration strategy, field and identifier mapping, compatibility/cutover sequencing, permissions, dry run, reconciliation, resource/locking risks, rollback, and acceptance criteria |
+
+Use the review profile first. After a human accepts its applicable findings and
+resolves the blocking business decisions, create a **new Change ID**, copy the
+canonical `templates/change-request.md`, select `DATABASE_MIGRATION`, and copy
+`templates/database-migration-change-request.md` into the new change directory.
+The review's request, findings, and authorization do not carry forward.
+
+```text
+database/data-contract review
+-> human review and business decisions
+-> new database-migration change request
+-> read-only migration discovery
+-> separate exact authorization for the applicable stage
+-> non-production rehearsal and reconciliation
+-> separately controlled execution
+-> evidence packet and human decision
+```
+
+The migration profile is still a proposal. It does not authorize database access,
+DDL, DML, data extraction, deployment, permission changes, cleanup, or production
+execution. The generic `implementation-authorization.md` also does not silently
+grant deployment or external database access; any permitted database operation
+must be named explicitly under the applicable human-controlled authorization.
+
 ## Per-Change Workflow
 
 For an unfamiliar application, complete and review the applicable baseline stages
@@ -118,7 +151,7 @@ current.
      "<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md"
    ```
 
-3. Start the copied `change-request.md` file with what the human knows. It is normal for `<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md` to be incomplete: fill in the intent, known constraints, and any decisions already made. Leave unknown fields blank rather than guessing. Each project/change folder has one canonical request file; do not create a second canonical request under another name. When the selected profile is lint/static-analysis baseline, bounded refactor, or database/data-contract review, copy the matching companion template into the same change directory and record its path in the canonical request. A companion adds profile-specific detail; it is not another authorization. Do not treat any request or profile as implementation authorization.
+3. Start the copied `change-request.md` file with what the human knows. It is normal for `<harness-path>/evidence/<Project Name>/<Change ID>/change-request.md` to be incomplete: fill in the intent, known constraints, and any decisions already made. Leave unknown fields blank rather than guessing. Each project/change folder has one canonical request file; do not create a second canonical request under another name. When the selected profile is lint/static-analysis baseline, bounded refactor, database/data-contract review, or database migration, copy the matching companion template into the same change directory and record its path in the canonical request. A companion adds profile-specific detail; it is not another authorization. Do not treat any request or profile as implementation authorization.
 4. Run the discovery prompt below. The agent must remain read-only with respect to the application workspace. It inspects the local codebase, identifies unanswered fields, and makes evidence-based recommendations. Use a Q&A session to narrow each decision: ask what the agent recommends, ask what to consider, then accept, reject, or revise its recommendation. The agent may update `change-request.md` only after the human agrees to the values being recorded. Save its generated discovery response as `<harness-path>/evidence/<Project Name>/<Change ID>/discovery.md` for human review. Do not copy or modify `<harness-path>/prompts/01-discovery.md`; it remains the reusable prompt.
 5. When the request is complete, a human reviews the discovery record and prepares the separate implementation authorization described below. The authorization must name the writable workspace, allowed files, commands, prohibited operations, and next permitted action.
 6. Run the implementation prompt below in a new edit-permitted session. The agent may edit only after the completed authorization is provided.
@@ -240,7 +273,7 @@ does not replace a change request or implementation authorization.
 
 Use the existing `templates/change-request.md`; its **Readiness Context and First-Change Scope** section is the reusable handoff for future applications. Follow the Per-Change Workflow to copy it into the change's external evidence directory. Record the readiness report path, assessment identity, your baseline review, and one selected recommendation or inventory finding. When entry-point or consequential-action evidence informed the selection, record those artifact paths and stable IDs as well. Leave unknown implementation details for discovery.
 
-This is where you can propose linting, static analysis, a bounded refactor, or a database/data-contract review. Prefer an existing check in check-only mode for a first quality baseline. Adding a tool or fixing findings requires its own explicit scope. Refactoring should preserve named behavior and have supporting tests. Database review must select an authority level and distinguish static source, expected schema, migrations, observed database metadata, and data profiling. Do not combine an initial baseline with broad formatting, automatic cleanup, schema mutation, or remediation. Readiness, entry-point mapping, inventory, reconciliation, and discovery do not execute these checks or authorize database access.
+This is where you can propose linting, static analysis, a bounded refactor, a database/data-contract review, or a post-review database migration. Prefer an existing check in check-only mode for a first quality baseline. Adding a tool or fixing findings requires its own explicit scope. Refactoring should preserve named behavior and have supporting tests. Database review must select an authority level and distinguish static source, expected schema, migrations, observed database metadata, and data profiling. A database migration uses a new Change ID and must link accepted review findings and resolved business decisions. Do not combine an initial baseline with broad formatting, automatic cleanup, schema mutation, or remediation. Readiness, entry-point mapping, inventory, reconciliation, and discovery do not execute these checks or authorize database access.
 
 After copying the request and filling in the known fields, use:
 

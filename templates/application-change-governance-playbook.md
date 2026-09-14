@@ -146,7 +146,10 @@ Every bounded change follows this sequence:
      refactor;
    - `DATABASE_DATA_CONTRACT_REVIEW` with
      `templates/database-data-contract-review.md` for a governed database,
-     migration/drift, data-quality, or cross-layer contract review.
+     migration/drift, data-quality, or cross-layer contract review;
+   - `DATABASE_MIGRATION` with a new Change ID and
+     `templates/database-migration-change-request.md` only after applicable review
+     findings and business decisions have been accepted.
 4. Complete read-only discovery using `prompts/01-discovery.md`. Record only
    human-accepted or explicitly unresolved values.
 5. Obtain a separate, complete `templates/implementation-authorization.md` with
@@ -220,7 +223,7 @@ Do not silently convert an unavailable check into a pass.
 | Consequential-action inventory | Trigger-to-boundary trace | [PATH/RULE] |
 | Reconciliation review | Cross-component verification | [PATH/RULE] |
 | `change-request.md` | Canonical bounded-change proposal | `[CHANGE ID]/change-request.md` |
-| Focused change profile | Lint baseline, bounded-refactor, or database/data-contract review detail | `[CHANGE ID]/[PROFILE].md` |
+| Focused change profile | Lint baseline, bounded-refactor, database/data-contract review, or post-review database-migration detail | `[CHANGE ID]/[PROFILE].md` |
 | `implementation-authorization.md` | Exact human-granted authority | `[CHANGE ID]/implementation-authorization.md` |
 | Source identity/workspace comparison | Before/after identity and drift evidence | `[CHANGE ID]/[ARTIFACT].json` |
 | Validation logs/results | Literal authorized command evidence | `[CHANGE ID]/validation/` |

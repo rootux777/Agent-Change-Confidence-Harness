@@ -21,7 +21,7 @@ installation, commits, or deployment.
 - Application governance playbook:
 - Readiness, entry-point, and action-inventory evidence:
 - External evidence directory:
-- Review status: DRAFT / READY_FOR_AUTHORIZATION / READY_FOR_HUMAN_REVIEW / SUPERSEDED
+- Review status: DRAFT / READY_FOR_REVIEW_EXECUTION_AUTHORIZATION / READY_FOR_HUMAN_REVIEW / SUPERSEDED
 
 ## Review mode and intended decision
 
@@ -270,7 +270,7 @@ question.
 - Human clarification decisions recorded:
 - Recommendations accepted or revised:
 - Profile complete: YES / NO
-- Review result: READY_FOR_AUTHORIZATION / READY_FOR_HUMAN_REVIEW / NEEDS_MORE_EVIDENCE / BLOCKED
+- Review result: READY_FOR_REVIEW_EXECUTION_AUTHORIZATION / READY_FOR_HUMAN_REVIEW / NEEDS_MORE_EVIDENCE / BLOCKED
 - Next permitted action: HUMAN_REVIEW_ONLY / [EXPLICIT ACTION]
 
 Acceptance of this review confirms only its recorded evidence and limitations. A
